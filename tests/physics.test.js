@@ -79,19 +79,21 @@ assert("f(r₀) ≈ 0.63", near(couplingGround(1.0), 0.63, 0.02),
 assert("f(r₀) between 1/5 and 1", couplingGround(1.0) > 0.2 && couplingGround(1.0) < 1);
 
 // ═══ VEV conservation (Eq. 55–62) ═══
-console.log("\nEq. 55–62 — VEV conservation:");
+console.log("\nEq. 55–62 — VEV conservation (heuristic interpolation):");
 const vev_rh = vevBreakdown(R_H);
 const vev_ra = vevBreakdown(R_A);
-const vev_sm = vevBreakdown(100);
+const vev_r0 = vevBreakdown(R_0);
 assert("v²+h² = 246² at R_H", near(vev_rh.v**2 + vev_rh.h**2, VEV**2, 1),
   `got ${(vev_rh.v**2 + vev_rh.h**2).toFixed(0)}`);
 assert("v²+h² = 246² at R_A", near(vev_ra.v**2 + vev_ra.h**2, VEV**2, 1));
-assert("v²+h² = 246² at SM", near(vev_sm.v**2 + vev_sm.h**2, VEV**2, 1),
-  `got ${(vev_sm.v**2 + vev_sm.h**2).toFixed(0)}`);
-assert("h > v at R_H (Higgs dominates)", vev_rh.h > vev_rh.v,
+assert("v²+h² = 246² at r₀", near(vev_r0.v**2 + vev_r0.h**2, VEV**2, 1),
+  `got ${(vev_r0.v**2 + vev_r0.h**2).toFixed(0)}`);
+assert("h dominates at R_H (deep well)", vev_rh.h > vev_rh.v,
   `v=${vev_rh.v.toFixed(1)} h=${vev_rh.h.toFixed(1)}`);
-assert("v > h at SM (vacuum dominates)", vev_sm.v > vev_sm.h,
-  `v=${vev_sm.v.toFixed(1)} h=${vev_sm.h.toFixed(1)}`);
+assert("h dominates at R_A (accretion)", vev_ra.h > vev_ra.v,
+  `v=${vev_ra.v.toFixed(1)} h=${vev_ra.h.toFixed(1)}`);
+assert("v dominates at r₀ (peak coupling, SM-like)", vev_r0.v > vev_r0.h,
+  `v=${vev_r0.v.toFixed(1)} h=${vev_r0.h.toFixed(1)}`);
 
 // ═══ Sombrero height (Eq. 48) ═══
 console.log("\nEq. 48 — Sombrero potential:");

@@ -70,16 +70,17 @@ export function sombreroZ(r) {
 }
 
 // VEV conservation (Eq. 55–62)
-// f ranges from 1/5 (at minima) to ~1/3 (SM limit).
-// Heuristic interpolation matching paper's stated values:
-//   At minima (f=1/5): v=110, h=220. At SM (f→1/3): v≈246, h≈0.
+// f ranges from 1/5 (at minima) to ~1/3 (SM limit at r→∞).
+// f is NOT monotonic — it dips back to 1/5 at the accretion disk.
+// The peak near r₀ (f≈0.63) is the closest to SM behavior.
+// Heuristic: map f linearly between F_MIN (all h) and F_PEAK (all v).
 // NOTE: intermediate values are approximate, not from a closed-form equation.
 export function vevBreakdown(r) {
   const f = couplingGround(r);
-  const F_MIN = 0.2;   // f at potential minima
-  const F_SM = 1 / 3;  // f at SM limit
+  const F_MIN = 0.2;    // f at potential minima (rh, ra)
+  const F_PEAK = 0.63;  // f near r₀ (maximum, closest to SM)
   if (isNaN(f) || f <= 0) return { v: 0, h: VEV, f };
-  const fNorm = Math.min(1, (f - F_MIN) / (F_SM - F_MIN)); // 0 at minima, 1 at SM
+  const fNorm = Math.max(0, Math.min(1, (f - F_MIN) / (F_PEAK - F_MIN)));
   const vSq = VEV * VEV * fNorm;
   const hSq = VEV * VEV * (1 - fNorm);
   return { v: Math.sqrt(Math.max(0, vSq)), h: Math.sqrt(Math.max(0, hSq)), f, fNorm };
