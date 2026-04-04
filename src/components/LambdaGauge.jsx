@@ -1,8 +1,11 @@
-import { couplingGround } from "../physics.js";
+import { couplingGround, R_T, R_0, R_A } from "../physics.js";
 
 export default function LambdaGauge({ radialPos }) {
   const f = couplingGround(radialPos);
-  const isMinimum = !isNaN(f) && f < 0.3;
+  // Determine regime by position, not coupling value
+  const insideWell = radialPos < R_T;
+  const atAccretion = Math.abs(radialPos - R_A) < 0.3;
+  const isMinimum = insideWell || atAccretion;
 
   return (
     <div style={{ textAlign: "center", padding: "0 16px" }}>
@@ -72,7 +75,9 @@ export default function LambdaGauge({ radialPos }) {
           height: 14,
         }}
       >
-        {isMinimum ? "NEAR POTENTIAL MINIMUM — λ/5 REGIME" : ""}
+        {insideWell ? "INSIDE SCHWARZSCHILD — λ/5 REGIME"
+          : atAccretion ? "ACCRETION DISK — λ/5 REGIME"
+          : radialPos > R_0 ? "SM EXTERIOR" : ""}
       </div>
     </div>
   );
