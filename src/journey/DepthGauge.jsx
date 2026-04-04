@@ -32,7 +32,7 @@ export default function DepthGauge({ radialPos }) {
       <div
         style={{
           position: "absolute",
-          left: -4,
+          right: -4,
           top: `calc(${dotPct}% - 5px)`,
           width: 10,
           height: 10,
@@ -67,22 +67,24 @@ const track = {
 
 const tick = {
   position: "absolute",
-  left: 0,
+  right: 0,
   display: "flex",
+  flexDirection: "row-reverse",
   alignItems: "center",
 };
 
 const tickLine = {
   width: 12,
   height: 1,
-  marginLeft: -5,
+  marginRight: -5,
 };
 
 const tickLabel = {
   fontFamily: "'IBM Plex Mono', monospace",
   fontSize: 9,
   letterSpacing: 1,
-  marginLeft: 10,
+  marginRight: 10,
   whiteSpace: "nowrap",
   textTransform: "uppercase",
+  textAlign: "right",
 };

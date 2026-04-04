@@ -285,7 +285,9 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
       diskMat.uniforms.brightness.value = 1.0;
       diskMat.uniforms.colorMix.value = 0.1 + goldMix * 0.3;
     } else {
-      diskMat.uniforms.brightness.value = pastHorizon ? 0.4 : 0.8;
+      // Fade disk out inside horizon — avoid confusing geometry from below
+      const interiorFade = pastHorizon ? Math.max(0, 1 - goldMix * 2) : 1;
+      diskMat.uniforms.brightness.value = (pastHorizon ? 0.3 : 0.8) * interiorFade;
       diskMat.uniforms.colorMix.value = goldMix;
     }
 
@@ -294,20 +296,20 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     glowMat.uniforms.glowColor.value = gc;
     glowMat.uniforms.intensity.value = phase === "crossing" ? 1.5 : (0.4 + depth * 0.6);
 
-    // ── Core light ──
-    coreLight.intensity = pastHorizon ? 2 + goldMix * 4 : depth * 1.5;
+    // ── Core light — dim, only gold particles should be bright inside ──
+    coreLight.intensity = pastHorizon ? 0.5 + goldMix * 1.5 : depth * 1.5;
     coreLight.color.setHex(goldMix > 0.3 ? 0xffd700 : 0x00d4ff);
 
-    // ── Fog ──
+    // ── Fog — heavy inside, claustrophobic ──
     s.scene.fog = pastHorizon
-      ? new THREE.FogExp2(0x050508, 0.04 + goldMix * 0.06)
+      ? new THREE.FogExp2(0x020304, 0.06 + goldMix * 0.08)
       : new THREE.FogExp2(0x020208, 0.008);
 
-    // ── Exposure ──
-    s.renderer.toneMappingExposure = darkBeat ? 0.05 : (pastHorizon ? 0.7 : 1.0);
+    // ── Exposure — dark interior ──
+    s.renderer.toneMappingExposure = darkBeat ? 0.05 : (pastHorizon ? 0.35 : 1.0);
 
-    // ── Background color shift ──
-    const bg = pastHorizon ? 0x050508 : 0x020208;
+    // ── Background — near-black inside ──
+    const bg = pastHorizon ? 0x020304 : 0x020208;
     s.renderer.setClearColor(bg, 1);
 
     // ── Sombrero bloom ──

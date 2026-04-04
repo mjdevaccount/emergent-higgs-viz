@@ -48,20 +48,31 @@ export default function JourneyShell() {
     const newR = rFromScroll(el.scrollTop, maxScroll);
     setR(newR);
 
-    // Core beat
+    // Core beat — trigger on enter, clear on leave
     if (newR < R_H + 0.03 && !beatDone.current) {
       beatDone.current = true;
       setDarkBeat(true);
       setTimeout(() => setShowPunchline(true), 1200);
       setTimeout(() => setDarkBeat(false), 3500);
     }
+    // Hide punchline when scrolling back out
+    if (newR > R_H + 0.15 && beatDone.current) {
+      beatDone.current = false;
+      setShowPunchline(false);
+      setDarkBeat(false);
+    }
 
-    // Post-credits: triggered at very bottom
+    // Post-credits: triggered at very bottom, clears on scroll back
     const scrollPct = el.scrollTop / maxScroll;
     if (scrollPct > 0.97 && !postDone.current) {
       postDone.current = true;
       setShowPostCredits(true);
       setTimeout(() => setEscapeParticle(true), 2000);
+    }
+    if (scrollPct < 0.93 && postDone.current) {
+      postDone.current = false;
+      setShowPostCredits(false);
+      setEscapeParticle(false);
     }
   }, []);
 
