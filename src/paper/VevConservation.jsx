@@ -1,0 +1,86 @@
+import { useState, useRef, useEffect } from "react";
+import { R_MIN } from "../physics.js";
+import Eq from "./Eq.jsx";
+import VevBreakdown from "../components/VevBreakdown.jsx";
+
+export default function VevConservation() {
+  const [radialPos, setRadialPos] = useState(2.0);
+
+  return (
+    <section style={section}>
+      <h2 style={heading}>3.8. Conservation of VEV and Restoration of SM &lambda;</h2>
+
+      <p style={prose}>
+        This is the central result. Inside the Schwarzschild sphere, the
+        potential minimum gives:
+      </p>
+
+      <Eq display num="57" tex={`
+        U^{\\text{SU(2)}}_{-}(r < r_0) = \\text{const.} - \\frac{1}{2}\\mu^2 \\phi^2
+        + \\frac{1}{5} \\cdot \\frac{1}{4} \\frac{\\mu^2}{v^2} \\phi^4
+      `} />
+
+      <p style={prose}>
+        Setting the derivative to zero
+        gives <Eq tex="\phi_{\text{vev}} = \sqrt{5}\,v = 246" /> GeV.
+        The observed VEV is preserved, but now:
+      </p>
+
+      <Eq display num="59" tex={`
+        \\phi^2_{\\text{vev}} = v^2 + h^2 = 5v^2
+        \\quad \\Rightarrow \\quad h^2 = 4v^2 \\gg v^2
+      `} />
+
+      <p style={prose}>
+        <strong>Inside the black hole, the Higgs perturbation dominates.</strong> The
+        factor of 1/5 is a simple consequence of VEV conservation when
+        perturbations in <Eq tex="h" /> carry the field strength rather
+        than <Eq tex="v" />:
+      </p>
+
+      <Eq display num="62" tex={`
+        v = \\frac{1}{\\sqrt{5}} \\cdot 246 \\approx 110 \\text{ GeV}
+        \\qquad
+        h_{\\text{vev}} = 2v \\approx 220 \\text{ GeV}
+      `} />
+
+      <p style={prose}>
+        A more general potential that preserves <Eq tex="\phi_{\text{vev}}" /> regardless
+        of the mapping space restores the SM quartic coupling:
+      </p>
+
+      <Eq display num="63" tex={`
+        U^{\\text{SU(2)}} = \\text{const.} - \\mu^2 \\Phi^\\dagger \\Phi
+        + \\lambda (\\Phi^\\dagger \\Phi)^2,
+        \\qquad \\lambda = \\frac{\\mu^2}{\\phi^2_{\\text{vev}}}
+      `} />
+
+      {/* Interactive VEV breakdown */}
+      <div style={figureBox}>
+        <VevBreakdown radialPos={radialPos} />
+        <Slider value={radialPos} onChange={setRadialPos} />
+      </div>
+    </section>
+  );
+}
+
+function Slider({ value, onChange }) {
+  return (
+    <div style={{ maxWidth: 400, margin: "12px auto 0", padding: "0 8px" }}>
+      <div style={sliderLabel}>
+        <span>r = r_h</span>
+        <span style={{ color: "#ffd700" }}>r / r₀ = {value.toFixed(3)}</span>
+        <span>r = 4r₀</span>
+      </div>
+      <input type="range" min={R_MIN + 0.001} max={4.0} step={0.001}
+        value={value} onChange={(e) => onChange(parseFloat(e.target.value))}
+        style={{ width: "100%", cursor: "pointer", marginTop: 4 }} />
+    </div>
+  );
+}
+
+const section = { maxWidth: 740, margin: "0 auto", padding: "40px 32px", borderTop: "1px solid rgba(255,215,0,0.1)" };
+const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#ffd700" };
+const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
+const figureBox = { background: "rgba(8,12,24,0.5)", border: "1px solid rgba(0,212,255,0.08)", borderRadius: 8, padding: "24px 16px", margin: "24px 0" };
+const sliderLabel = { display: "flex", justifyContent: "space-between", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(180,200,220,0.4)" };

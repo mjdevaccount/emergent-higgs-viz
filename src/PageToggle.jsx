@@ -15,18 +15,15 @@ export default function PageToggle({ mode, onToggle }) {
         background: "rgba(6,6,16,0.7)",
       }}
     >
-      <button
-        onClick={() => onToggle("journey")}
-        style={mode === "journey" ? activeBtn : inactiveBtn}
-      >
-        Journey
-      </button>
-      <button
-        onClick={() => onToggle("technical")}
-        style={mode === "technical" ? activeBtn : inactiveBtn}
-      >
-        Technical
-      </button>
+      {["paper", "journey", "dashboard"].map((m) => (
+        <button
+          key={m}
+          onClick={() => onToggle(m)}
+          style={mode === m ? activeBtn : inactiveBtn}
+        >
+          {m === "paper" ? "Paper" : m === "journey" ? "Journey" : "Dashboard"}
+        </button>
+      ))}
     </div>
   );
 }
