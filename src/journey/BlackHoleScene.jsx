@@ -1,21 +1,29 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
-import { R_MIN, R_H, R_0, R_A, sombreroHeight, couplingGround } from "../physics.js";
+import { R_MIN, R_H, R_0, R_A, sombreroHeight } from "../physics.js";
 import { createParticleSystem, updateParticles, disposeParticles } from "./particles.js";
+
+// Phases: cosmos | accretion | approach | crossing | interior | core
+function getPhase(r) {
+  if (r > 3.5) return "cosmos";
+  if (r > 2.8) return "accretion";
+  if (r > 1.05) return "approach";
+  if (r > 0.95) return "crossing";
+  if (r > R_H + 0.05) return "interior";
+  return "core";
+}
 
 export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
   const mountRef = useRef(null);
-  const stateRef = useRef(null);
+  const sRef = useRef(null);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount || width === 0) return;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x020208, 0.015);
-
-    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 200);
-    camera.position.set(0, 12, 18);
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 500);
+    camera.position.set(0, 5, 40);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -29,43 +37,44 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     // ── Lighting ──
     const ambient = new THREE.AmbientLight(0x0a1020, 0.3);
     scene.add(ambient);
-
-    const coreLight = new THREE.PointLight(0x00d4ff, 0, 20);
+    const coreLight = new THREE.PointLight(0x00d4ff, 0, 30);
     coreLight.position.set(0, 0, 0);
     scene.add(coreLight);
 
-    const rimLight = new THREE.PointLight(0xffd700, 0, 15);
-    rimLight.position.set(0, 2, 0);
-    scene.add(rimLight);
-
     // ── Event Horizon (black sphere) ──
-    const horizonGeo = new THREE.SphereGeometry(1.0, 64, 64);
+    const horizonGeo = new THREE.SphereGeometry(1, 64, 64);
     const horizonMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
     const horizon = new THREE.Mesh(horizonGeo, horizonMat);
     scene.add(horizon);
 
     // Horizon edge glow
-    const glowGeo = new THREE.SphereGeometry(1.05, 64, 64);
+    const glowGeo = new THREE.SphereGeometry(1.06, 64, 64);
     const glowMat = new THREE.ShaderMaterial({
       transparent: true,
       side: THREE.BackSide,
+      depthWrite: false,
       uniforms: {
         glowColor: { value: new THREE.Color(0x00d4ff) },
-        intensity: { value: 0.6 },
+        intensity: { value: 0.5 },
       },
       vertexShader: `
         varying vec3 vNormal;
+        varying vec3 vViewDir;
         void main() {
           vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+          vViewDir = normalize(-mvPos.xyz);
+          gl_Position = projectionMatrix * mvPos;
         }
       `,
       fragmentShader: `
         uniform vec3 glowColor;
         uniform float intensity;
         varying vec3 vNormal;
+        varying vec3 vViewDir;
         void main() {
-          float glow = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+          float rim = 1.0 - max(0.0, dot(vNormal, vViewDir));
+          float glow = pow(rim, 2.5);
           gl_FragColor = vec4(glowColor, glow * intensity);
         }
       `,
@@ -74,13 +83,15 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     scene.add(glowMesh);
 
     // ── Accretion Disk ──
-    const diskGeo = new THREE.RingGeometry(1.8, 5.0, 128, 1);
+    const diskGeo = new THREE.RingGeometry(1.5, 4.5, 128, 3);
     const diskMat = new THREE.ShaderMaterial({
       transparent: true,
       side: THREE.DoubleSide,
+      depthWrite: false,
       uniforms: {
         time: { value: 0 },
-        colorMix: { value: 0.0 }, // 0 = cyan, 1 = gold
+        colorMix: { value: 0.0 },
+        brightness: { value: 0.5 },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -94,30 +105,49 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
       fragmentShader: `
         uniform float time;
         uniform float colorMix;
+        uniform float brightness;
         varying vec2 vUv;
         varying float vDist;
         void main() {
-          float ring = smoothstep(1.8, 2.2, vDist) * smoothstep(5.0, 3.5, vDist);
-          float swirl = sin(vUv.x * 40.0 + time * 2.0) * 0.15 + 0.85;
-          float brightness = ring * swirl;
+          float ring = smoothstep(1.5, 2.0, vDist) * smoothstep(4.5, 3.0, vDist);
+          float swirl = sin(vUv.x * 50.0 + time * 3.0) * 0.2 + 0.8;
+          float hot = smoothstep(3.5, 1.8, vDist); // brighter near center
+          float b = ring * swirl * (0.5 + hot * 0.5) * brightness;
 
           vec3 cyan = vec3(0.0, 0.7, 1.0);
           vec3 gold = vec3(1.0, 0.75, 0.0);
           vec3 col = mix(cyan, gold, colorMix);
-
-          gl_FragColor = vec4(col * brightness, brightness * 0.7);
+          gl_FragColor = vec4(col * b, b * 0.8);
         }
       `,
     });
     const disk = new THREE.Mesh(diskGeo, diskMat);
-    disk.rotation.x = -Math.PI / 2;
+    disk.rotation.x = -Math.PI * 0.47; // slight tilt
     scene.add(disk);
 
-    // ── Sombrero (hidden initially, blooms at core) ──
-    const somRes = 60;
-    const somRange = 2.0;
+    // ── Stars ──
+    const STAR_COUNT = 2000;
+    const starPositions = new Float32Array(STAR_COUNT * 3);
+    const starOriginal = new Float32Array(STAR_COUNT * 3); // original positions
+    for (let i = 0; i < STAR_COUNT * 3; i += 3) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 80 + Math.random() * 120;
+      starPositions[i] = starOriginal[i] = r * Math.sin(phi) * Math.cos(theta);
+      starPositions[i + 1] = starOriginal[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+      starPositions[i + 2] = starOriginal[i + 2] = r * Math.cos(phi);
+    }
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xaabbdd, size: 0.3, sizeAttenuation: true, transparent: true, opacity: 1 });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    // ── Sombrero (blooms at core) ──
+    const somRes = 50;
+    const somRange = 1.8;
     const somVerts = new Float32Array((somRes + 1) * (somRes + 1) * 3);
-    const somIndices = [];
+    const somIdx = [];
     for (let i = 0; i <= somRes; i++) {
       for (let j = 0; j <= somRes; j++) {
         const idx = i * (somRes + 1) + j;
@@ -129,23 +159,16 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     for (let i = 0; i < somRes; i++) {
       for (let j = 0; j < somRes; j++) {
         const a = i * (somRes + 1) + j;
-        somIndices.push(a, a + 1, a + somRes + 1, a + 1, a + somRes + 2, a + somRes + 1);
+        somIdx.push(a, a + 1, a + somRes + 1, a + 1, a + somRes + 2, a + somRes + 1);
       }
     }
     const somGeo = new THREE.BufferGeometry();
     somGeo.setAttribute("position", new THREE.BufferAttribute(somVerts, 3));
-    somGeo.setIndex(somIndices);
-    somGeo.computeVertexNormals();
-
+    somGeo.setIndex(somIdx);
     const somMat = new THREE.MeshStandardMaterial({
-      color: 0xffd700,
-      emissive: 0xffd700,
-      emissiveIntensity: 0.2,
-      roughness: 0.5,
-      metalness: 0.3,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0,
+      color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.3,
+      roughness: 0.4, metalness: 0.3, side: THREE.DoubleSide,
+      transparent: true, opacity: 0,
     });
     const sombrero = new THREE.Mesh(somGeo, somMat);
     sombrero.visible = false;
@@ -154,39 +177,24 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     // ── Particles ──
     const particles = createParticleSystem(scene);
 
-    // ── Stars background ──
-    const starGeo = new THREE.BufferGeometry();
-    const starVerts = new Float32Array(3000);
-    for (let i = 0; i < 3000; i += 3) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = 60 + Math.random() * 40;
-      starVerts[i] = r * Math.sin(phi) * Math.cos(theta);
-      starVerts[i + 1] = r * Math.sin(phi) * Math.sin(theta);
-      starVerts[i + 2] = r * Math.cos(phi);
-    }
-    starGeo.setAttribute("position", new THREE.BufferAttribute(starVerts, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0x8899bb, size: 0.15, sizeAttenuation: true });
-    scene.add(new THREE.Points(starGeo, starMat));
-
-    stateRef.current = {
+    sRef.current = {
       scene, camera, renderer,
-      horizon, glowMat, disk, diskMat,
+      horizon, glowMesh, glowMat,
+      disk, diskMat,
+      stars, starMat, starGeo, starOriginal,
       sombrero, somGeo, somMat, somRes, somRange,
-      coreLight, rimLight,
-      particles,
+      coreLight, particles,
       clock: new THREE.Clock(),
     };
 
     let raf;
     const animate = () => {
-      const s = stateRef.current;
+      const s = sRef.current;
       if (!s) return;
       const delta = s.clock.getDelta();
       s.diskMat.uniforms.time.value += delta;
-      s.disk.rotation.z += delta * 0.15;
-
-      updateParticles(s.particles, s._radialPos || 4.0, delta);
+      s.disk.rotation.z += delta * 0.12;
+      updateParticles(s.particles, s._r || 4.0, delta);
       s.renderer.render(s.scene, s.camera);
       raf = requestAnimationFrame(animate);
     };
@@ -195,80 +203,125 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     return () => {
       cancelAnimationFrame(raf);
       renderer.dispose();
-      horizonGeo.dispose(); horizonMat.dispose();
-      glowGeo.dispose(); glowMat.dispose();
-      diskGeo.dispose(); diskMat.dispose();
-      somGeo.dispose(); somMat.dispose();
-      starGeo.dispose(); starMat.dispose();
+      [horizonGeo, horizonMat, glowGeo, glowMat, diskGeo, diskMat, somGeo, somMat, starGeo, starMat].forEach(d => d.dispose());
       disposeParticles(particles);
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
     };
   }, [width, height]);
 
-  // ── Update scene on scroll (radialPos changes) ──
+  // ── Drive everything from radialPos ──
   useEffect(() => {
-    const s = stateRef.current;
+    const s = sRef.current;
     if (!s) return;
-    s._radialPos = radialPos;
+    s._r = radialPos;
 
-    const { camera, coreLight, rimLight, diskMat, glowMat,
-            sombrero, somGeo, somMat, somRes, somRange } = s;
+    const phase = getPhase(radialPos);
+    const { camera, horizon, glowMesh, glowMat, disk, diskMat,
+            stars, starMat, starGeo, starOriginal,
+            sombrero, somGeo, somMat, somRes, somRange, coreLight } = s;
 
-    // Depth: 0 = far, 1 = core
+    // ── Depth & gold mix ──
     const depth = Math.max(0, Math.min(1, (4.0 - radialPos) / 3.4));
-    // Gold mix: 0 = outside (cyan), 1 = deep inside (gold)
     const goldMix = Math.max(0, Math.min(1, (1.0 - radialPos) / 0.6));
+    const pastHorizon = radialPos < R_0;
 
-    // ── Camera spiral ──
-    const angle = depth * Math.PI * 3; // 1.5 full rotations
-    const camDist = 18 - depth * 14; // 18 → 4
-    const camHeight = 12 - depth * 10; // 12 → 2
+    // ── Black hole scale: 5% of view at r=4, 80% at r=r₀ ──
+    const bhScale = 0.3 + depth * 6;
+    horizon.scale.setScalar(bhScale);
+    glowMesh.scale.setScalar(bhScale * 1.06);
+
+    // ── Camera ──
+    const spiralAngle = depth * Math.PI * 2.5;
+    let camDist, camY;
+    if (phase === "cosmos") {
+      camDist = 40; camY = 5;
+    } else if (phase === "interior" || phase === "core") {
+      camDist = 3 - depth * 1.5;
+      camY = 1 - depth * 2;
+    } else {
+      camDist = 40 - depth * 34;
+      camY = 5 - depth * 4;
+    }
     camera.position.set(
-      Math.sin(angle) * camDist,
-      camHeight,
-      Math.cos(angle) * camDist,
+      Math.sin(spiralAngle) * camDist,
+      camY,
+      Math.cos(spiralAngle) * camDist,
     );
-    camera.lookAt(0, -depth * 1.5, 0);
+    camera.lookAt(0, pastHorizon ? -1 : 0, 0);
 
-    // ── Lighting shifts ──
-    coreLight.intensity = depth * 3;
-    coreLight.color.setHex(goldMix > 0.5 ? 0xffd700 : 0x00d4ff);
-    rimLight.intensity = goldMix * 2;
+    // ── Stars: bright in cosmos, stretch in approach, vanish at crossing ──
+    const starPos = starGeo.attributes.position.array;
+    if (phase === "cosmos" || phase === "accretion") {
+      starMat.opacity = phase === "cosmos" ? 1.0 : 0.6;
+      for (let i = 0; i < starPos.length; i++) starPos[i] = starOriginal[i];
+    } else if (phase === "approach") {
+      starMat.opacity = 0.7;
+      const stretch = ((2.8 - radialPos) / 1.75); // 0→1 through approach
+      for (let i = 0; i < starPos.length; i += 3) {
+        const ox = starOriginal[i], oy = starOriginal[i+1], oz = starOriginal[i+2];
+        // Stretch radially toward camera
+        const dx = ox - camera.position.x;
+        const dy = oy - camera.position.y;
+        const dz = oz - camera.position.z;
+        const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        const factor = 1 + stretch * 0.4;
+        starPos[i] = camera.position.x + dx * factor;
+        starPos[i+1] = camera.position.y + dy * factor;
+        starPos[i+2] = camera.position.z + dz * factor;
+      }
+    } else {
+      starMat.opacity = 0; // vanish at crossing and beyond
+    }
+    starGeo.attributes.position.needsUpdate = true;
 
-    // ── Accretion disk color ──
-    diskMat.uniforms.colorMix.value = goldMix;
+    // ── Disk brightness & color ──
+    if (phase === "cosmos") {
+      diskMat.uniforms.brightness.value = 0.3;
+      diskMat.uniforms.colorMix.value = 0;
+    } else if (phase === "accretion") {
+      diskMat.uniforms.brightness.value = 1.2; // dramatic brightening
+      diskMat.uniforms.colorMix.value = 0.15;
+    } else if (phase === "approach") {
+      diskMat.uniforms.brightness.value = 1.0;
+      diskMat.uniforms.colorMix.value = 0.1 + goldMix * 0.3;
+    } else {
+      diskMat.uniforms.brightness.value = pastHorizon ? 0.4 : 0.8;
+      diskMat.uniforms.colorMix.value = goldMix;
+    }
 
-    // ── Horizon glow color shift ──
-    const glowColor = new THREE.Color().lerpColors(
-      new THREE.Color(0x00d4ff),
-      new THREE.Color(0xffd700),
-      goldMix,
-    );
-    glowMat.uniforms.glowColor.value = glowColor;
-    glowMat.uniforms.intensity.value = 0.4 + depth * 0.8;
+    // ── Glow color ──
+    const gc = new THREE.Color().lerpColors(new THREE.Color(0x00d4ff), new THREE.Color(0xffd700), goldMix);
+    glowMat.uniforms.glowColor.value = gc;
+    glowMat.uniforms.intensity.value = phase === "crossing" ? 1.5 : (0.4 + depth * 0.6);
 
-    // ── Fog density ──
-    s.scene.fog.density = 0.015 + goldMix * 0.03;
+    // ── Core light ──
+    coreLight.intensity = pastHorizon ? 2 + goldMix * 4 : depth * 1.5;
+    coreLight.color.setHex(goldMix > 0.3 ? 0xffd700 : 0x00d4ff);
 
-    // ── Tone mapping exposure ──
-    s.renderer.toneMappingExposure = darkBeat ? 0.1 : (1.0 - goldMix * 0.3);
+    // ── Fog ──
+    s.scene.fog = pastHorizon
+      ? new THREE.FogExp2(0x050508, 0.04 + goldMix * 0.06)
+      : new THREE.FogExp2(0x020208, 0.008);
 
-    // ── Sombrero bloom at core ──
-    const somThreshold = 0.15; // radialPos below which sombrero appears
-    const somProgress = Math.max(0, Math.min(1, (somThreshold - (radialPos - R_H)) / somThreshold));
+    // ── Exposure ──
+    s.renderer.toneMappingExposure = darkBeat ? 0.05 : (pastHorizon ? 0.7 : 1.0);
 
-    if (somProgress > 0) {
+    // ── Background color shift ──
+    const bg = pastHorizon ? 0x050508 : 0x020208;
+    s.renderer.setClearColor(bg, 1);
+
+    // ── Sombrero bloom ──
+    const somT = Math.max(0, Math.min(1, (R_H + 0.1 - radialPos) / 0.1));
+    if (somT > 0 && !darkBeat) {
       sombrero.visible = true;
-      somMat.opacity = somProgress * 0.8;
-
+      somMat.opacity = somT * 0.7;
       const pos = somGeo.attributes.position.array;
       for (let i = 0; i <= somRes; i++) {
         for (let j = 0; j <= somRes; j++) {
           const idx = i * (somRes + 1) + j;
-          const phi1 = ((i / somRes) * 2 - 1) * somRange;
-          const phi2 = ((j / somRes) * 2 - 1) * somRange;
-          const y = sombreroHeight(phi1, phi2, radialPos) * somProgress * 3;
-          pos[idx * 3 + 1] = y;
+          const p1 = ((i / somRes) * 2 - 1) * somRange;
+          const p2 = ((j / somRes) * 2 - 1) * somRange;
+          pos[idx * 3 + 1] = sombreroHeight(p1, p2, radialPos) * somT * 4;
         }
       }
       somGeo.attributes.position.needsUpdate = true;

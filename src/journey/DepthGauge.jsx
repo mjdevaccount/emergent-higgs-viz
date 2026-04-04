@@ -1,0 +1,88 @@
+import { R_H, R_T, R_0, R_A, R_MIN } from "../physics.js";
+
+const TICKS = [
+  { r: 4.0, label: "the cosmos", color: "rgba(180,200,220,0.3)" },
+  { r: R_A, label: "accretion disk", color: "rgba(255,200,50,0.5)" },
+  { r: R_0, label: "event horizon", color: "rgba(255,80,80,0.6)" },
+  { r: R_T, label: "symmetry breaks", color: "rgba(0,255,140,0.5)" },
+  { r: R_H, label: "the core", color: "rgba(255,215,0,0.7)" },
+];
+
+const R_TOP = 4.0;
+const R_BOT = R_MIN + 0.01;
+
+export default function DepthGauge({ radialPos }) {
+  const pct = (r) => ((R_TOP - r) / (R_TOP - R_BOT)) * 100;
+  const dotPct = pct(radialPos);
+
+  return (
+    <div style={container}>
+      {/* Track */}
+      <div style={track} />
+
+      {/* Ticks */}
+      {TICKS.map(({ r, label, color }) => (
+        <div key={label} style={{ ...tick, top: `${pct(r)}%` }}>
+          <div style={{ ...tickLine, background: color }} />
+          <div style={{ ...tickLabel, color }}>{label}</div>
+        </div>
+      ))}
+
+      {/* Glowing dot */}
+      <div
+        style={{
+          position: "absolute",
+          left: -4,
+          top: `calc(${dotPct}% - 5px)`,
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          background: radialPos <= R_0 ? "#ffd700" : "#00d4ff",
+          boxShadow: `0 0 12px ${radialPos <= R_0 ? "rgba(255,215,0,0.6)" : "rgba(0,212,255,0.6)"}`,
+          transition: "top 0.1s ease, background 0.3s ease",
+        }}
+      />
+    </div>
+  );
+}
+
+const container = {
+  position: "fixed",
+  right: 24,
+  top: "10%",
+  height: "80%",
+  width: 2,
+  zIndex: 900,
+};
+
+const track = {
+  position: "absolute",
+  left: 0,
+  top: 0,
+  width: 2,
+  height: "100%",
+  background: "rgba(180,200,220,0.08)",
+  borderRadius: 1,
+};
+
+const tick = {
+  position: "absolute",
+  left: 0,
+  display: "flex",
+  alignItems: "center",
+};
+
+const tickLine = {
+  width: 12,
+  height: 1,
+  marginLeft: -5,
+};
+
+const tickLabel = {
+  fontFamily: "'IBM Plex Mono', monospace",
+  fontSize: 9,
+  letterSpacing: 1,
+  marginLeft: 10,
+  whiteSpace: "nowrap",
+  textTransform: "uppercase",
+};
