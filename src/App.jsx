@@ -5,6 +5,7 @@ import DualPotentialPlot from "./DualPotential.jsx";
 import CouplingPlot from "./CouplingPlot.jsx";
 import SombreroViz from "./SombreroViz.jsx";
 import LambdaGauge from "./LambdaGauge.jsx";
+import VevBreakdown from "./VevBreakdown.jsx";
 
 export default function EmergentHiggs() {
   const [radialPos, setRadialPos] = useState(2.0);
@@ -310,6 +311,17 @@ export default function EmergentHiggs() {
             <div style={metricSub}>CONSERVED ACROSS ALL r</div>
           </div>
         </div>
+
+        {/* ── VEV Conservation ── */}
+        <section
+          style={{
+            maxWidth: 500,
+            margin: "0 auto",
+            padding: isMobile ? "16px 16px 32px" : "16px 32px 48px",
+          }}
+        >
+          <VevBreakdown radialPos={radialPos} />
+        </section>
 
         {/* ── Footer ── */}
         <div

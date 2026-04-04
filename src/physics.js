@@ -72,6 +72,19 @@ export function sombreroZ(r) {
   return 1 + (1 / (r * r)) * (0.25 + sign * s);
 }
 
+// VEV conservation (Eq. 55–62)
+// Potential minimum: φ²_vev = v²/f(r), with φ_vev = 246 GeV conserved.
+// So v(r) = 246·√f, h(r) = 246·√(1−f) when f ≤ 1.
+// At f = 1/5: v ≈ 110 GeV, h ≈ 220 GeV (Higgs perturbations dominate).
+export function vevBreakdown(r) {
+  const f = couplingGround(r);
+  if (isNaN(f) || f <= 0) return { v: 0, h: VEV, f };
+  if (f >= 1) return { v: VEV, h: 0, f };
+  const v = VEV * Math.sqrt(f);
+  const h = VEV * Math.sqrt(1 - f);
+  return { v, h, f };
+}
+
 export function sombreroHeight(phi1, phi2, r) {
   const z = sombreroZ(r);
   const phiSq = phi1 * phi1 + phi2 * phi2;
