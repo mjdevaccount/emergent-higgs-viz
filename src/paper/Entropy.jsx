@@ -3,8 +3,7 @@ import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
 import EntropyMap from "../components/EntropyMap.jsx";
 
-export default function Entropy() {
-  const [radialPos, setRadialPos] = useState(1.0);
+export default function Entropy({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
 
@@ -50,7 +49,7 @@ export default function Entropy() {
             height={300}
           />
         )}
-        <Slider value={radialPos} onChange={setRadialPos} />
+        <Slider value={radialPos} onChange={onChangeR} />
         <div style={caption}>
           <strong>Figure 6.</strong> Parameters <Eq tex="\alpha_1^-" /> (solid
           cyan) and <Eq tex="\alpha_2^+" /> (dashed orange) plotted

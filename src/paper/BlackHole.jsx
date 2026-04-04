@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
 import SombreroViz from "../components/SombreroViz.jsx";
 
-export default function BlackHole() {
-  const [radialPos, setRadialPos] = useState(0.65);
+export default function BlackHole({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
 
@@ -55,7 +54,7 @@ export default function BlackHole() {
         {somW > 0 && (
           <SombreroViz radialPos={radialPos} width={somW} height={320} />
         )}
-        <Slider value={radialPos} onChange={setRadialPos} />
+        <Slider value={radialPos} onChange={onChangeR} />
         <div style={caption}>
           <strong>Sombrero potential</strong> — shape warps with radial position.
           At <Eq tex="r_h" /> the bowl is wide and shallow (<Eq tex="\lambda/5" />).

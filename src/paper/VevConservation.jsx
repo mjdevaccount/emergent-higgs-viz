@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
 import VevBreakdown from "../components/VevBreakdown.jsx";
 
-export default function VevConservation() {
-  const [radialPos, setRadialPos] = useState(2.0);
+export default function VevConservation({ radialPos, onChangeR }) {
 
   return (
     <section style={section}>
@@ -58,7 +57,7 @@ export default function VevConservation() {
       {/* Interactive VEV breakdown */}
       <div style={figureBox}>
         <VevBreakdown radialPos={radialPos} />
-        <Slider value={radialPos} onChange={setRadialPos} />
+        <Slider value={radialPos} onChange={onChangeR} />
       </div>
     </section>
   );

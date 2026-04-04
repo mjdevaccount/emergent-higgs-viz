@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
 import DualPotentialPlot from "../components/DualPotential.jsx";
 
-export default function SymmetryBreaking() {
-  const [radialPos, setRadialPos] = useState(2.0);
+export default function SymmetryBreaking({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
 
@@ -50,7 +49,7 @@ export default function SymmetryBreaking() {
             height={360}
           />
         )}
-        <Slider value={radialPos} onChange={setRadialPos} />
+        <Slider value={radialPos} onChange={onChangeR} />
         <div style={caption}>
           <strong>Figure 2.</strong> Potential post-transition corresponding to
           the ground and excited state with minimums

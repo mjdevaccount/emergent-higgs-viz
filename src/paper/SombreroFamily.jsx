@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
 import CouplingPlot from "../components/CouplingPlot.jsx";
 
-export default function SombreroFamily() {
-  const [radialPos, setRadialPos] = useState(2.0);
+export default function SombreroFamily({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
 
@@ -52,7 +51,7 @@ export default function SombreroFamily() {
             height={320}
           />
         )}
-        <Slider value={radialPos} onChange={setRadialPos} />
+        <Slider value={radialPos} onChange={onChangeR} />
         <div style={caption}>
           <strong>Figure 3.</strong> Quartic coupling
           coefficient <Eq tex="f(r)" /> across <Eq tex="r/r_0" />.
