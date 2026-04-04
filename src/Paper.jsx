@@ -4,6 +4,7 @@ import Framework from "./paper/Framework.jsx";
 import SymmetryBreaking from "./paper/SymmetryBreaking.jsx";
 import BlackHole from "./paper/BlackHole.jsx";
 import SombreroFamily from "./paper/SombreroFamily.jsx";
+import SpatialMapSection from "./paper/SpatialMapSection.jsx";
 import Transition from "./paper/Transition.jsx";
 import VevConservation from "./paper/VevConservation.jsx";
 import Entropy from "./paper/Entropy.jsx";
@@ -21,6 +22,7 @@ export default function Paper() {
       <SymmetryBreaking />
       <BlackHole />
       <SombreroFamily />
+      <SpatialMapSection />
       <Transition />
       <VevConservation />
       <Entropy />

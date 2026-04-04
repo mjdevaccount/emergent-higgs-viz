@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { R_MIN, R_H, R_0, R_A, alpha1Minus, alpha1Plus } from "../physics.js";
+import { R_MIN, R_H, R_0, R_A, alpha1Minus, alpha1Plus, alpha2Plus } from "../physics.js";
 
 export default function EntropyMap({ radialPos, width, height }) {
   const canvasRef = useRef(null);
@@ -116,6 +116,35 @@ export default function EntropyMap({ radialPos, width, height }) {
     }
     ctx.stroke();
     ctx.shadowBlur = 0;
+
+    // α₂⁺ curve (paper's Figure 6 plots both)
+    ctx.strokeStyle = "rgba(255,150,50,0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    started = false;
+    for (let i = 0; i <= steps; i++) {
+      const r2 = rMin + ((rMax - rMin) * i) / steps;
+      const a2 = alpha2Plus(r2);
+      if (isNaN(a2)) continue;
+      const x = toX(r2);
+      const yRaw = toY(a2);
+      const y = Math.max(pad.top, Math.min(pad.top + h, yRaw));
+      if (yRaw < pad.top - 80 || yRaw > pad.top + h + 80) { started = false; continue; }
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Legend
+    ctx.font = "9px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "right";
+    const lx = pad.left + w - 4;
+    ctx.fillStyle = "#00d4ff";
+    ctx.fillText("━━ α₁⁻ (ground)", lx, pad.top + h - 20);
+    ctx.fillStyle = "rgba(255,150,50,0.7)";
+    ctx.fillText("┅┅ α₂⁺", lx, pad.top + h - 8);
 
     // Position marker
     const r = radialPos;
