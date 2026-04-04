@@ -93,7 +93,7 @@ const stickySlider = {
   background: "rgba(6,6,16,0.92)",
   backdropFilter: "blur(12px)",
   borderBottom: "1px solid rgba(0,212,255,0.08)",
-  padding: "8px 24px",
+  padding: "8px 220px 8px 24px",
   display: "flex",
   alignItems: "center",
   gap: 12,
