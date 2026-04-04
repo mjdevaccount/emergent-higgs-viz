@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "katex/dist/katex.min.css";
 import { R_MIN } from "./physics.js";
+import { HighlightProvider } from "./paper/HighlightContext.jsx";
 import Header from "./paper/Header.jsx";
 import Framework from "./paper/Framework.jsx";
 import SymmetryBreaking from "./paper/SymmetryBreaking.jsx";
@@ -27,6 +28,7 @@ export default function Paper() {
   const [r, setR] = useState(2.0);
 
   return (
+    <HighlightProvider>
     <div style={container}>
       <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap"
@@ -73,6 +75,7 @@ export default function Paper() {
       <div id="entropy"><Entropy radialPos={r} onChangeR={setR} /></div>
       <References />
     </div>
+    </HighlightProvider>
   );
 }
 

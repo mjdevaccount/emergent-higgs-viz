@@ -15,8 +15,8 @@ export default function VevConservation({ radialPos, onChangeR }) {
       </p>
 
       <Eq display num="57" tex={`
-        U^{\\text{SU(2)}}_{-}(r < r_0) = \\text{const.} - \\frac{1}{2}\\mu^2 \\phi^2
-        + \\frac{1}{5} \\cdot \\frac{1}{4} \\frac{\\mu^2}{v^2} \\phi^4
+        U^{\\text{SU(2)}}_{-}(r < \\htmlClass{hl-r0}{r_0}) = \\text{const.} - \\frac{1}{2}\\mu^2 \\phi^2
+        + \\htmlClass{hl-lambda5}{\\frac{1}{5}} \\cdot \\frac{1}{4} \\frac{\\mu^2}{v^2} \\phi^4
       `} />
 
       <p style={prose}>

@@ -4,7 +4,7 @@ import {
   potentialPlus, potentialMinus, groundState,
 } from "../physics.js";
 
-export default function DualPotentialPlot({ radialPos, width, height }) {
+export default function DualPotentialPlot({ radialPos, width, height, highlight }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -70,31 +70,34 @@ export default function DualPotentialPlot({ radialPos, width, height }) {
 
     // Key radii vertical lines
     const radii = [
-      { r: R_MIN, label: "r_min", color: "rgba(180,180,180,0.3)", sublabel: `${R_MIN.toFixed(3)}r₀` },
-      { r: R_H, label: "rₕ", color: "rgba(0,212,255,0.5)", sublabel: `${R_H.toFixed(3)}r₀` },
-      { r: R_T, label: "r_T", color: "rgba(0,255,140,0.4)", sublabel: `${R_T.toFixed(3)}r₀` },
-      { r: R_0, label: "r₀", color: "rgba(255,80,80,0.5)", sublabel: "Schwarzschild" },
-      { r: R_A, label: "rₐ", color: "rgba(255,200,50,0.4)", sublabel: `${R_A.toFixed(2)}r₀` },
+      { r: R_MIN, label: "r_min", hlKey: "rmin", color: "rgba(180,180,180,0.3)", sublabel: `${R_MIN.toFixed(3)}r₀` },
+      { r: R_H, label: "rₕ", hlKey: "rh", color: "rgba(0,212,255,0.5)", sublabel: `${R_H.toFixed(3)}r₀` },
+      { r: R_T, label: "r_T", hlKey: "rt", color: "rgba(0,255,140,0.4)", sublabel: `${R_T.toFixed(3)}r₀` },
+      { r: R_0, label: "r₀", hlKey: "r0", color: "rgba(255,80,80,0.5)", sublabel: "Schwarzschild" },
+      { r: R_A, label: "rₐ", hlKey: "ra", color: "rgba(255,200,50,0.4)", sublabel: `${R_A.toFixed(2)}r₀` },
     ];
 
-    for (const { r, label, color, sublabel } of radii) {
+    for (const { r, label, hlKey, color, sublabel } of radii) {
       if (r < rMin || r > rMax) continue;
       const x = toX(r);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 4]);
+      const isHl = highlight === hlKey || highlight === "r0" && hlKey === "r0";
+      ctx.strokeStyle = isHl ? "#ffd700" : color;
+      ctx.lineWidth = isHl ? 3 : 1;
+      if (isHl) { ctx.shadowColor = "rgba(255,215,0,0.6)"; ctx.shadowBlur = 12; }
+      ctx.setLineDash(isHl ? [] : [4, 4]);
       ctx.beginPath();
       ctx.moveTo(x, pad.top);
       ctx.lineTo(x, pad.top + h);
       ctx.stroke();
       ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
 
-      ctx.fillStyle = color.replace(/[\d.]+\)$/, "0.9)");
+      ctx.fillStyle = isHl ? "#ffd700" : color.replace(/[\d.]+\)$/, "0.9)");
       ctx.font = "italic 11px 'Cormorant Garamond', Georgia, serif";
       ctx.textAlign = "center";
       ctx.fillText(label, x, pad.top + h + 16);
       ctx.font = "9px 'IBM Plex Mono', monospace";
-      ctx.fillStyle = color;
+      ctx.fillStyle = isHl ? "rgba(255,215,0,0.7)" : color;
       ctx.fillText(sublabel, x, pad.top + h + 28);
     }
 
@@ -212,7 +215,7 @@ export default function DualPotentialPlot({ radialPos, width, height }) {
       const v = viewMin + ((viewMax - viewMin) * i) / 5;
       ctx.fillText(v.toFixed(1), pad.left - 6, toY(v) + 4);
     }
-  }, [radialPos, width, height]);
+  }, [radialPos, width, height, highlight]);
 
   return <canvas ref={canvasRef} style={{ width, height }} />;
 }
