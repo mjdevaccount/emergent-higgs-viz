@@ -1,6 +1,6 @@
 # Emergent Higgs Field & the Schwarzschild Black Hole
 
-Interactive visualization of [Dragana Pilipovic's 2026 paper](https://doi.org/10.3390/particles9020037) exploring how the electroweak Higgs field emerges from stochastic spacetime perturbations inside a Schwarzschild black hole.
+Interactive visualization of [Dragana Pilipovic's 2026 paper](https://www.mdpi.com/2571-712X/9/2/37#Abstract) exploring how the electroweak Higgs field emerges from stochastic spacetime perturbations inside a Schwarzschild black hole.
 
 **The one-sentence version:** *This paper says the thing that gives everything mass is born inside black holes.*
 
@@ -138,4 +138,4 @@ Requires Node.js 18+.
 
 ## Reference
 
-Pilipovic, D. (2026). *Emergent Higgs Field and the Schwarzschild Black Hole.* Particles, 9(2), 37. [doi:10.3390/particles9020037](https://doi.org/10.3390/particles9020037)
+Pilipovic, D. (2026). *Emergent Higgs Field and the Schwarzschild Black Hole.* Particles, 9(2), 37. [doi:10.3390/particles9020037](https://www.mdpi.com/2571-712X/9/2/37#Abstract)
