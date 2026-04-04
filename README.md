@@ -39,7 +39,11 @@ A readable, scrollable document that follows the paper's structure. Each section
 - Sticky table of contents with smooth scroll navigation
 - Global radial position slider synced across all sections
 - KaTeX-rendered equations with paper equation numbers
+- **Interactive equation highlighting**: hover over `r₀` or `λ/5` in any equation and the corresponding element pulses gold in the visualization (via KaTeX `\htmlClass` + shared React context)
 - Copyable BibTeX citation block
+- DOI, CC BY 4.0, and test-passing badges
+- "Interactive Supplementary Material" designation
+- Google Scholar indexing via Highwire Press meta tags and Schema.org `ScholarlyArticle` JSON-LD
 
 ### Journey Mode
 
@@ -56,7 +60,7 @@ A scroll-driven cinematic descent into a black hole. Every visual is powered by 
 | **Interior** (r₀ → 0.65r₀) | Dark, foggy, claustrophobic, gold particles only |
 
 **Elements:**
-- Three.js black hole with edge glow shader and rotating accretion disk
+- Three.js black hole with edge glow shader, rotating accretion disk, and **gravitational lensing post-processing** — a screen-space Schwarzschild deflection shader that distorts background stars around the event horizon, darkens rays inside, and produces Einstein ring glow at the photon sphere (1.5 r_s)
 - 1500 instanced particles spiraling inward; 1.13% escape as gold streaks (tunneling probability)
 - Camera spirals in over 2.5 rotations, driven by scroll position
 - Depth gauge (right) with labeled tick marks at each key radius
@@ -133,9 +137,10 @@ src/
   App.jsx                           Dashboard mode layout
   PageToggle.jsx                    Paper | Journey | Dashboard switcher
 
-  paper/                            Paper mode sections (11 files)
-    Eq.jsx                          KaTeX equation renderer
-    Header.jsx                      Title, author, abstract
+  paper/                            Paper mode sections (12 files)
+    Eq.jsx                          KaTeX equation renderer + hover highlighting
+    HighlightContext.jsx            Shared highlight state for equation↔viz links
+    Header.jsx                      Title, author, abstract, badges
     Framework.jsx                   §2 — stochastic spacetime
     SymmetryBreaking.jsx            §3.1–3.2 + Figure 2
     BlackHole.jsx                   §3.3–3.4 + sombrero
@@ -157,9 +162,10 @@ src/
     EntropyMap.jsx                  α₁⁻ + α₂⁺ parameter plot
     StarField.jsx                   Animated star background
 
-  journey/                          Journey mode (6 files)
+  journey/                          Journey mode (7 files)
     JourneyShell.jsx                Scroll container, phases, chapter cards
-    BlackHoleScene.jsx              Three.js scene (black hole, disk, glow)
+    BlackHoleScene.jsx              Three.js scene + post-processing pipeline
+    LensingPass.js                  Schwarzschild gravitational lensing shader
     particles.js                    1500 instanced particles + tunneling
     DepthGauge.jsx                  Vertical progress indicator
     VevBar.jsx                      Horizontal balance bar
@@ -192,7 +198,7 @@ Requires Node.js 18+. Deployed to GitHub Pages via Actions on push to master.
 | Technology | Purpose |
 |---|---|
 | React 19 | Component architecture |
-| Three.js | 3D sombrero, black hole scene, instanced particles |
+| Three.js + postprocessing | 3D sombrero, black hole scene, instanced particles, gravitational lensing |
 | KaTeX | LaTeX equation rendering |
 | Vite | Build tooling, HMR, production bundling |
 | Web Audio API | Spatial audio (browser-native) |

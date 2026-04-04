@@ -1,7 +1,11 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { R_MIN, R_H, R_0, R_A, sombreroHeight } from "../physics.js";
 import { createParticleSystem, updateParticles, disposeParticles } from "./particles.js";
+import { LensingShader } from "./LensingPass.js";
 
 // Phases: cosmos | accretion | approach | crossing | interior | core
 function getPhase(r) {
@@ -33,6 +37,13 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
     mount.appendChild(renderer.domElement);
+
+    // ── Post-processing: gravitational lensing ──
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const lensingPass = new ShaderPass(LensingShader);
+    lensingPass.uniforms.resolution.value.set(width, height);
+    composer.addPass(lensingPass);
 
     // ── Lighting ──
     const ambient = new THREE.AmbientLight(0x0a1020, 0.3);
@@ -178,7 +189,7 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     const particles = createParticleSystem(scene);
 
     sRef.current = {
-      scene, camera, renderer,
+      scene, camera, renderer, composer, lensingPass,
       horizon, glowMesh, glowMat,
       disk, diskMat,
       stars, starMat, starGeo, starOriginal,
@@ -195,7 +206,7 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
       s.diskMat.uniforms.time.value += delta;
       s.disk.rotation.z += delta * 0.12;
       updateParticles(s.particles, s._r || 4.0, delta);
-      s.renderer.render(s.scene, s.camera);
+      s.composer.render();
       raf = requestAnimationFrame(animate);
     };
     raf = requestAnimationFrame(animate);
@@ -218,7 +229,8 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     const phase = getPhase(radialPos);
     const { camera, horizon, glowMesh, glowMat, disk, diskMat,
             stars, starMat, starGeo, starOriginal,
-            sombrero, somGeo, somMat, somRes, somRange, coreLight } = s;
+            sombrero, somGeo, somMat, somRes, somRange, coreLight,
+            lensingPass } = s;
 
     // ── Depth & gold mix ──
     const depth = Math.max(0, Math.min(1, (4.0 - radialPos) / 3.4));
@@ -331,6 +343,20 @@ export default function BlackHoleScene({ radialPos, width, height, darkBeat }) {
     } else {
       sombrero.visible = false;
     }
+
+    // ── Gravitational lensing uniforms ──
+    // Project black hole center to screen space
+    const bhScreen = new THREE.Vector3(0, 0, 0).project(camera);
+    lensingPass.uniforms.bhScreenPos.value.set(
+      (bhScreen.x + 1) / 2,
+      (bhScreen.y + 1) / 2,
+    );
+    // Screen radius scales with bhScale
+    lensingPass.uniforms.bhScreenRadius.value = bhScale * 0.015;
+    // Strength ramps up as you approach, fades inside
+    lensingPass.uniforms.strength.value = pastHorizon
+      ? Math.max(0, 0.5 - goldMix * 0.5)
+      : Math.min(1.5, depth * 2);
   }, [radialPos, darkBeat]);
 
   return <div ref={mountRef} style={{ width, height }} />;
