@@ -1,40 +1,56 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import * as THREE from "three";
 
-// ── Physics helpers ──────────────────────────────────────────────
-const LAMBDA_SM = 0.13; // SM quartic coupling (approximate)
+// ── Exact Physics from Paper (Eq. 32, 51) ──────────────────────
 const VEV = 246; // GeV
 
-function spatialPotential(r) {
-  // Physically motivated V(r) near Schwarzschild BH
-  // Deep well inside r_s, barrier at r_s, shallow well at ~1.6 r_s (accretion disk)
-  const wellInner = -2.8 * Math.exp(-Math.pow((r - 0.35) / 0.22, 2));
-  const barrier = 1.2 * Math.exp(-Math.pow((r - 1.0) / 0.15, 2));
-  const wellOuter = -0.45 * Math.exp(-Math.pow((r - 1.6) / 0.25, 2));
-  const asymptotic = 0.1 / (1 + Math.pow(r - 1, 2));
-  return wellInner + barrier + wellOuter + asymptotic;
+// Key radii (all in units of r₀), derived exactly from the paper
+const R_MIN = Math.sqrt(3 / 8);           // ≈ 0.6124 — minimum physical radius
+const R_H = Math.sqrt(5 - Math.sqrt(21)); // ≈ 0.6502 — deep well minimum
+const R_T = Math.sqrt(7 / 8);             // ≈ 0.9354 — transition point
+const R_0 = 1.0;                          // Schwarzschild radius (r₀)
+const R_A = Math.sqrt(5 + Math.sqrt(21)); // ≈ 3.0976 — accretion disk
+
+// Helper: √(r²/(2r₀²) - 3/16), returns NaN below r_min
+function sqrtTerm(rRatio) {
+  const val = (rRatio * rRatio) / 2 - 3 / 16;
+  return val >= 0 ? Math.sqrt(val) : NaN;
 }
 
-function effectiveLambda(r) {
-  // Lambda varies with radial position, hits lambda/5 at potential minima
-  const vr = spatialPotential(r);
-  const vMin = -2.8;
-  const vMax = 1.2;
-  const normalized = (vr - vMin) / (vMax - vMin);
-  const factor = 0.2 + 0.8 * Math.pow(normalized, 0.6);
-  return LAMBDA_SM * Math.max(0.2, Math.min(1.0, factor));
+// Eq. 32: U±(r) / (m²φ²) — the two potential states
+function potentialPlus(rRatio) {
+  const s = sqrtTerm(rRatio);
+  if (isNaN(s)) return NaN;
+  const r2 = rRatio * rRatio;
+  const r4 = r2 * r2;
+  const termA = (0.25 - s); // (1/4 - √...)
+  const termB = (0.25 + s); // (1/4 + √...)
+  return 2 * (1 + 2 * termA * termA / r2 + 2 * termB * termB / r4);
 }
 
-function sombreroHeight(phi1, phi2, lambda) {
-  const phiSq = phi1 * phi1 + phi2 * phi2;
-  const mu2 = 2 * lambda * VEV * VEV;
-  return (-mu2 * phiSq + lambda * phiSq * phiSq) / (VEV * VEV * VEV * VEV) * 0.5;
+function potentialMinus(rRatio) {
+  const s = sqrtTerm(rRatio);
+  if (isNaN(s)) return NaN;
+  const r2 = rRatio * rRatio;
+  const r4 = r2 * r2;
+  const termA = (0.25 + s); // (1/4 + √...)
+  const termB = (0.25 - s); // (1/4 - √...)
+  return 2 * (1 + 2 * termA * termA / r2 + 2 * termB * termB / r4);
+}
+
+// Ground state: U- inside r₀, U+ outside r₀
+function groundStatePotential(rRatio) {
+  return rRatio <= R_0 ? potentialMinus(rRatio) : potentialPlus(rRatio);
+}
+
+// Excited state: U+ inside r₀, U- outside r₀
+function excitedStatePotential(rRatio) {
+  return rRatio <= R_0 ? potentialPlus(rRatio) : potentialMinus(rRatio);
 }
 
 // ── Background Stars ─────────────────────────────────────────────
 function StarField() {
   const canvasRef = useRef(null);
-  const starsRef = useRef([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -47,7 +63,6 @@ function StarField() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Generate stars
     const stars = [];
     for (let i = 0; i < 200; i++) {
       stars.push({
@@ -59,7 +74,6 @@ function StarField() {
         phase: Math.random() * Math.PI * 2,
       });
     }
-    starsRef.current = stars;
 
     let raf;
     const draw = (time) => {
@@ -96,8 +110,8 @@ function StarField() {
   );
 }
 
-// ── V(r) Spatial Potential Plot ──────────────────────────────────
-function SpatialPlot({ radialPos, width, height }) {
+// ── Dual Potential Plot U±(r) — Eq. 32 ─────────────────────────
+function DualPotentialPlot({ radialPos, width, height }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -109,15 +123,43 @@ function SpatialPlot({ radialPos, width, height }) {
     canvas.height = height * dpr;
     ctx.scale(dpr, dpr);
 
-    const pad = { top: 30, right: 20, bottom: 50, left: 55 };
+    const pad = { top: 35, right: 25, bottom: 55, left: 60 };
     const w = width - pad.left - pad.right;
     const h = height - pad.top - pad.bottom;
 
-    // Clear
     ctx.clearRect(0, 0, width, height);
 
+    // Compute both curves
+    const rMin = R_MIN + 0.001;
+    const rMax = 4.0;
+    const steps = 400;
+    const pointsPlus = [];
+    const pointsMinus = [];
+    let vMin = Infinity, vMax = -Infinity;
+
+    for (let i = 0; i <= steps; i++) {
+      const r = rMin + ((rMax - rMin) * i) / steps;
+      const vp = potentialPlus(r);
+      const vm = potentialMinus(r);
+      if (!isNaN(vp) && !isNaN(vm)) {
+        pointsPlus.push({ r, v: vp });
+        pointsMinus.push({ r, v: vm });
+        const lo = Math.min(vp, vm);
+        const hi = Math.max(vp, vm);
+        if (lo < vMin) vMin = lo;
+        if (hi > vMax) vMax = hi;
+      }
+    }
+
+    // Clamp view range to show the interesting structure
+    const viewMin = Math.max(vMin - 0.5, 0);
+    const viewMax = Math.min(vMax + 1, 25);
+
+    const toX = (r) => pad.left + ((r - rMin) / (rMax - rMin)) * w;
+    const toY = (v) => pad.top + h - ((v - viewMin) / (viewMax - viewMin)) * h;
+
     // Grid
-    ctx.strokeStyle = "rgba(0,212,255,0.08)";
+    ctx.strokeStyle = "rgba(0,212,255,0.06)";
     ctx.lineWidth = 0.5;
     for (let i = 0; i <= 5; i++) {
       const y = pad.top + (h * i) / 5;
@@ -126,143 +168,163 @@ function SpatialPlot({ radialPos, width, height }) {
       ctx.lineTo(pad.left + w, y);
       ctx.stroke();
     }
-    for (let i = 0; i <= 5; i++) {
-      const x = pad.left + (w * i) / 5;
+    for (let i = 0; i <= 6; i++) {
+      const x = pad.left + (w * i) / 6;
       ctx.beginPath();
       ctx.moveTo(x, pad.top);
       ctx.lineTo(x, pad.top + h);
       ctx.stroke();
     }
 
-    // Schwarzschild radius line
-    const rsX = pad.left + (1.0 / 4.0) * w;
-    ctx.strokeStyle = "rgba(255,80,80,0.4)";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
+    // Key radii vertical lines
+    const radii = [
+      { r: R_MIN, label: "r_min", color: "rgba(180,180,180,0.3)", sublabel: `${R_MIN.toFixed(3)}r₀` },
+      { r: R_H, label: "rₕ", color: "rgba(0,212,255,0.5)", sublabel: `${R_H.toFixed(3)}r₀` },
+      { r: R_T, label: "r_T", color: "rgba(0,255,140,0.4)", sublabel: `${R_T.toFixed(3)}r₀` },
+      { r: R_0, label: "r₀", color: "rgba(255,80,80,0.5)", sublabel: "Schwarzschild" },
+      { r: R_A, label: "rₐ", color: "rgba(255,200,50,0.4)", sublabel: `${R_A.toFixed(2)}r₀` },
+    ];
+
+    for (const { r, label, color, sublabel } of radii) {
+      if (r < rMin || r > rMax) continue;
+      const x = toX(r);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x, pad.top);
+      ctx.lineTo(x, pad.top + h);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = color.replace(/[\d.]+\)$/, "0.9)");
+      ctx.font = "italic 11px 'Cormorant Garamond', Georgia, serif";
+      ctx.textAlign = "center";
+      ctx.fillText(label, x, pad.top + h + 16);
+      ctx.font = "9px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = color;
+      ctx.fillText(sublabel, x, pad.top + h + 28);
+    }
+
+    // Draw U+ curve (excited inside r₀, ground outside)
+    ctx.shadowColor = "rgba(255,100,100,0.4)";
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = "rgba(255,120,120,0.6)";
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.moveTo(rsX, pad.top);
-    ctx.lineTo(rsX, pad.top + h);
+    let started = false;
+    for (const p of pointsPlus) {
+      const x = toX(p.r);
+      const y = toY(p.v);
+      if (y < pad.top || y > pad.top + h) { started = false; continue; }
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
     ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
 
-    // Label r_s
-    ctx.fillStyle = "rgba(255,100,100,0.8)";
-    ctx.font = "italic 11px 'Cormorant Garamond', Georgia, serif";
-    ctx.textAlign = "center";
-    ctx.fillText("r = rₛ", rsX, pad.top + h + 30);
-
-    // Accretion disk line
-    const adX = pad.left + (1.6 / 4.0) * w;
-    ctx.strokeStyle = "rgba(255,200,50,0.3)";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
+    // Draw U- curve (ground inside r₀, excited outside)
+    ctx.shadowColor = "rgba(0,212,255,0.5)";
+    ctx.shadowBlur = 10;
+    ctx.strokeStyle = "#00d4ff";
+    ctx.lineWidth = 2.2;
     ctx.beginPath();
-    ctx.moveTo(adX, pad.top);
-    ctx.lineTo(adX, pad.top + h);
+    started = false;
+    for (const p of pointsMinus) {
+      const x = toX(p.r);
+      const y = toY(p.v);
+      if (y < pad.top || y > pad.top + h) { started = false; continue; }
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
     ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "rgba(255,200,50,0.7)";
-    ctx.fillText("accretion", adX, pad.top + h + 20);
-    ctx.fillText("disk", adX, pad.top + h + 33);
-
-    // Compute potential
-    const rMin = 0.05;
-    const rMax = 4.0;
-    const steps = 300;
-    const points = [];
-    let vMin = Infinity,
-      vMax = -Infinity;
+    // Ground state highlight (thicker overlay): U- for r<r₀, U+ for r>r₀
+    ctx.shadowColor = "rgba(255,215,0,0.3)";
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = "rgba(255,215,0,0.5)";
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    started = false;
     for (let i = 0; i <= steps; i++) {
       const r = rMin + ((rMax - rMin) * i) / steps;
-      const v = spatialPotential(r);
-      points.push({ r, v });
-      if (v < vMin) vMin = v;
-      if (v > vMax) vMax = v;
+      const v = groundStatePotential(r);
+      if (isNaN(v)) continue;
+      const x = toX(r);
+      const y = toY(v);
+      if (y < pad.top || y > pad.top + h) { started = false; continue; }
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
     }
-    vMin -= 0.3;
-    vMax += 0.3;
-
-    const toX = (r) => pad.left + ((r - rMin) / (rMax - rMin)) * w;
-    const toY = (v) => pad.top + h - ((v - vMin) / (vMax - vMin)) * h;
-
-    // Glow effect for curve
-    ctx.shadowColor = "rgba(0,212,255,0.6)";
-    ctx.shadowBlur = 12;
-    ctx.strokeStyle = "#00d4ff";
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    points.forEach((p, i) => {
-      const x = toX(p.r);
-      const y = toY(p.v);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // Fill under curve with gradient
-    const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + h);
-    grad.addColorStop(0, "rgba(0,212,255,0.05)");
-    grad.addColorStop(1, "rgba(0,212,255,0.0)");
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    points.forEach((p, i) => {
-      const x = toX(p.r);
-      const y = toY(p.v);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.lineTo(toX(points[points.length - 1].r), pad.top + h);
-    ctx.lineTo(toX(points[0].r), pad.top + h);
-    ctx.closePath();
-    ctx.fill();
+    // Current position marker on ground state
+    const curV = groundStatePotential(radialPos);
+    if (!isNaN(curV)) {
+      const mx = toX(radialPos);
+      const my = toY(curV);
+      if (my >= pad.top && my <= pad.top + h) {
+        // Pulse ring
+        ctx.strokeStyle = "rgba(255,215,0,0.5)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(mx, my, 10, 0, Math.PI * 2);
+        ctx.stroke();
 
-    // Current position marker
-    const curV = spatialPotential(radialPos);
-    const mx = toX(radialPos);
-    const my = toY(curV);
+        // Dot
+        ctx.shadowColor = "rgba(255,215,0,0.8)";
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = "#ffd700";
+        ctx.beginPath();
+        ctx.arc(mx, my, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
 
-    // Pulse ring
-    ctx.strokeStyle = "rgba(255,215,0,0.5)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(mx, my, 10, 0, Math.PI * 2);
-    ctx.stroke();
+    // Legend
+    ctx.font = "11px 'IBM Plex Mono', monospace";
+    const legendY = pad.top + 14;
+    const legendX = pad.left + w - 10;
+    ctx.textAlign = "right";
 
-    // Dot
-    ctx.shadowColor = "rgba(255,215,0,0.8)";
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = "#ffd700";
-    ctx.beginPath();
-    ctx.arc(mx, my, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#00d4ff";
+    ctx.fillText("── U⁻", legendX, legendY);
+    ctx.fillStyle = "rgba(255,120,120,0.8)";
+    ctx.fillText("── U⁺", legendX, legendY + 16);
+    ctx.fillStyle = "rgba(255,215,0,0.8)";
+    ctx.fillText("━━ ground state", legendX, legendY + 32);
 
     // Axis labels
     ctx.fillStyle = "rgba(180,200,220,0.6)";
     ctx.font = "12px 'IBM Plex Mono', monospace";
     ctx.textAlign = "center";
-    ctx.fillText("r / rₛ", pad.left + w / 2, pad.top + h + 46);
+    ctx.fillText("r / r₀", pad.left + w / 2, pad.top + h + 48);
 
     ctx.save();
     ctx.translate(14, pad.top + h / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText("V(r)", 0, 0);
+    ctx.fillText("U±(r) / m²φ²", 0, 0);
     ctx.restore();
 
-    // Tick labels
+    // Tick labels on x-axis
     ctx.fillStyle = "rgba(180,200,220,0.4)";
     ctx.font = "10px 'IBM Plex Mono', monospace";
     ctx.textAlign = "center";
-    for (let r = 0; r <= 4; r++) {
-      ctx.fillText(r.toString(), toX(r), pad.top + h + 16);
+    for (let r = 1; r <= 4; r++) {
+      ctx.fillText(r.toString(), toX(r), pad.top + h + 42);
     }
 
-    // Region labels
-    ctx.font = "italic 11px 'Cormorant Garamond', Georgia, serif";
-    ctx.fillStyle = "rgba(0,212,255,0.5)";
-    ctx.fillText("inside BH", pad.left + w * 0.1, pad.top + 18);
-    ctx.fillStyle = "rgba(180,200,220,0.3)";
-    ctx.fillText("exterior", pad.left + w * 0.65, pad.top + 18);
+    // Tick labels on y-axis
+    ctx.textAlign = "right";
+    const ySteps = 5;
+    for (let i = 0; i <= ySteps; i++) {
+      const v = viewMin + ((viewMax - viewMin) * i) / ySteps;
+      const y = toY(v);
+      ctx.fillText(v.toFixed(1), pad.left - 6, y + 4);
+    }
   }, [radialPos, width, height]);
 
   return (
@@ -270,272 +332,6 @@ function SpatialPlot({ radialPos, width, height }) {
       ref={canvasRef}
       style={{ width, height }}
     />
-  );
-}
-
-// ── 3D Sombrero ─────────────────────────────────────────────────
-function SombreroViz({ radialPos, width, height }) {
-  const mountRef = useRef(null);
-  const sceneRef = useRef(null);
-  const meshRef = useRef(null);
-  const wireRef = useRef(null);
-  const rendererRef = useRef(null);
-  const rafRef = useRef(null);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(3.5, 2.8, 3.5);
-    camera.lookAt(0, -0.3, 0);
-
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio || 1);
-    renderer.setClearColor(0x000000, 0);
-    mount.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
-
-    // Lights
-    const amb = new THREE.AmbientLight(0x334466, 0.6);
-    scene.add(amb);
-    const dir = new THREE.DirectionalLight(0x00d4ff, 0.8);
-    dir.position.set(3, 5, 3);
-    scene.add(dir);
-    const dir2 = new THREE.DirectionalLight(0xffd700, 0.4);
-    dir2.position.set(-3, 3, -2);
-    scene.add(dir2);
-    const point = new THREE.PointLight(0x8844ff, 0.5, 10);
-    point.position.set(0, 2, 0);
-    scene.add(point);
-
-    // Create parametric geometry
-    const res = 80;
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-    const colors = [];
-    const indices = [];
-
-    const phiRange = 2.0;
-    for (let i = 0; i <= res; i++) {
-      for (let j = 0; j <= res; j++) {
-        const u = (i / res) * 2 - 1;
-        const v = (j / res) * 2 - 1;
-        const phi1 = u * phiRange;
-        const phi2 = v * phiRange;
-        const y = sombreroHeight(phi1, phi2, LAMBDA_SM);
-        vertices.push(phi1, y, phi2);
-        colors.push(0, 0, 0); // placeholder
-      }
-    }
-
-    for (let i = 0; i < res; i++) {
-      for (let j = 0; j < res; j++) {
-        const a = i * (res + 1) + j;
-        const b = a + 1;
-        const c = (i + 1) * (res + 1) + j;
-        const d = c + 1;
-        indices.push(a, b, c);
-        indices.push(b, d, c);
-      }
-    }
-
-    geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-    geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
-
-    const mat = new THREE.MeshPhongMaterial({
-      vertexColors: true,
-      side: THREE.DoubleSide,
-      shininess: 60,
-      transparent: true,
-      opacity: 0.85,
-    });
-
-    const mesh = new THREE.Mesh(geometry, mat);
-    scene.add(mesh);
-    meshRef.current = mesh;
-
-    // Wireframe
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x00d4ff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.08,
-    });
-    const wire = new THREE.Mesh(geometry.clone(), wireMat);
-    scene.add(wire);
-    wireRef.current = wire;
-
-    sceneRef.current = { scene, camera, renderer };
-
-    // Rotation
-    let angle = 0;
-    const animate = () => {
-      angle += 0.003;
-      mesh.rotation.y = angle;
-      wire.rotation.y = angle;
-      renderer.render(scene, camera);
-      rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      renderer.dispose();
-      geometry.dispose();
-      mat.dispose();
-      wireMat.dispose();
-      if (mount.contains(renderer.domElement)) {
-        mount.removeChild(renderer.domElement);
-      }
-    };
-  }, [width, height]);
-
-  // Update geometry when radialPos changes
-  useEffect(() => {
-    const mesh = meshRef.current;
-    const wire = wireRef.current;
-    if (!mesh) return;
-
-    const lambda = effectiveLambda(radialPos);
-    const res = 80;
-    const phiRange = 2.0;
-    const pos = mesh.geometry.attributes.position.array;
-    const col = mesh.geometry.attributes.color.array;
-
-    let yMin = Infinity, yMax = -Infinity;
-    const yVals = [];
-    
-    for (let i = 0; i <= res; i++) {
-      for (let j = 0; j <= res; j++) {
-        const idx = i * (res + 1) + j;
-        const u = (i / res) * 2 - 1;
-        const v = (j / res) * 2 - 1;
-        const phi1 = u * phiRange;
-        const phi2 = v * phiRange;
-        const y = sombreroHeight(phi1, phi2, lambda);
-        pos[idx * 3 + 1] = y;
-        yVals.push(y);
-        if (y < yMin) yMin = y;
-        if (y > yMax) yMax = y;
-      }
-    }
-
-    // Color by height
-    for (let i = 0; i < yVals.length; i++) {
-      const t = (yVals[i] - yMin) / (yMax - yMin + 0.001);
-      // Deep blue at bottom, cyan in middle, gold at top
-      if (t < 0.5) {
-        const s = t * 2;
-        col[i * 3] = 0.05 + s * 0.0;
-        col[i * 3 + 1] = 0.05 + s * 0.6;
-        col[i * 3 + 2] = 0.4 + s * 0.6;
-      } else {
-        const s = (t - 0.5) * 2;
-        col[i * 3] = 0.0 + s * 1.0;
-        col[i * 3 + 1] = 0.65 + s * 0.2;
-        col[i * 3 + 2] = 1.0 - s * 0.6;
-      }
-    }
-
-    mesh.geometry.attributes.position.needsUpdate = true;
-    mesh.geometry.attributes.color.needsUpdate = true;
-    mesh.geometry.computeVertexNormals();
-
-    // Update wireframe too
-    if (wire) {
-      const wPos = wire.geometry.attributes.position.array;
-      for (let i = 0; i < pos.length; i++) {
-        wPos[i] = pos[i];
-      }
-      wire.geometry.attributes.position.needsUpdate = true;
-    }
-  }, [radialPos]);
-
-  return <div ref={mountRef} style={{ width, height }} />;
-}
-
-// ── Lambda Gauge ─────────────────────────────────────────────────
-function LambdaGauge({ radialPos }) {
-  const lambda = effectiveLambda(radialPos);
-  const ratio = lambda / LAMBDA_SM;
-  const isMinimum = ratio < 0.35;
-
-  return (
-    <div style={{ textAlign: "center", padding: "0 16px" }}>
-      <div
-        style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 11,
-          color: "rgba(180,200,220,0.5)",
-          letterSpacing: 2,
-          marginBottom: 8,
-          textTransform: "uppercase",
-        }}
-      >
-        Quartic Coupling
-      </div>
-      <div
-        style={{
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontSize: 36,
-          fontWeight: 300,
-          color: isMinimum ? "#ffd700" : "#00d4ff",
-          transition: "color 0.5s ease",
-          lineHeight: 1,
-        }}
-      >
-        λ{ratio < 0.35 ? (
-          <span style={{ fontSize: 20, verticalAlign: "super" }}>/5</span>
-        ) : (
-          <span style={{ fontSize: 20, verticalAlign: "super" }}>
-            ×{ratio.toFixed(2)}
-          </span>
-        )}
-      </div>
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 200,
-          height: 3,
-          background: "rgba(0,212,255,0.1)",
-          borderRadius: 2,
-          margin: "12px auto 0",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: `${ratio * 100}%`,
-            height: "100%",
-            background: isMinimum
-              ? "linear-gradient(90deg, #ffd700, #ffaa00)"
-              : "linear-gradient(90deg, #00d4ff, #0088ff)",
-            borderRadius: 2,
-            transition: "width 0.3s ease, background 0.5s ease",
-          }}
-        />
-      </div>
-      <div
-        style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 10,
-          color: isMinimum ? "rgba(255,215,0,0.7)" : "rgba(180,200,220,0.3)",
-          marginTop: 6,
-          transition: "color 0.5s ease",
-          height: 14,
-        }}
-      >
-        {isMinimum ? "AT POTENTIAL MINIMUM — SM DEVIATION" : ""}
-      </div>
-    </div>
   );
 }
 
@@ -560,8 +356,20 @@ export default function EmergentHiggs() {
   }, []);
 
   const isMobile = dims.w < 768;
-  const panelW = isMobile ? dims.w - 32 : Math.min((dims.w - 80) / 2, 560);
-  const panelH = isMobile ? 260 : 340;
+  const plotW = isMobile ? dims.w - 32 : Math.min(dims.w - 80, 900);
+  const plotH = isMobile ? 300 : 420;
+
+  const groundV = groundStatePotential(radialPos);
+  const excitedV = excitedStatePotential(radialPos);
+
+  // Determine which region the slider is in
+  let regionLabel = "";
+  if (radialPos < R_H + 0.01) regionLabel = "deep well minimum";
+  else if (radialPos < R_T) regionLabel = "inside Schwarzschild sphere";
+  else if (radialPos < R_0 + 0.03) regionLabel = "near Schwarzschild horizon";
+  else if (radialPos < R_A - 0.3) regionLabel = "exterior region";
+  else if (radialPos < R_A + 0.3) regionLabel = "accretion disk";
+  else regionLabel = "far exterior";
 
   return (
     <div
@@ -575,7 +383,6 @@ export default function EmergentHiggs() {
         overflow: "hidden",
       }}
     >
-      {/* Fonts */}
       <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap"
         rel="stylesheet"
@@ -592,8 +399,7 @@ export default function EmergentHiggs() {
           width: 800,
           height: 800,
           transform: "translate(-50%, -50%)",
-          background:
-            "radial-gradient(circle, rgba(0,50,120,0.15) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(0,50,120,0.15) 0%, transparent 70%)",
           pointerEvents: "none",
           zIndex: 1,
         }}
@@ -619,7 +425,7 @@ export default function EmergentHiggs() {
               marginBottom: 16,
             }}
           >
-            Interactive Visualization
+            Interactive Visualization — Full Paper Implementation
           </div>
           <h1
             style={{
@@ -646,7 +452,7 @@ export default function EmergentHiggs() {
             }}
           >
             Dragana Pilipović &nbsp;·&nbsp; Particles 2026, 9(2), 37
-            &nbsp;·&nbsp; CERN CMS Collaboration
+            &nbsp;·&nbsp; doi:10.3390/particles9020037
           </div>
           <p
             style={{
@@ -660,118 +466,66 @@ export default function EmergentHiggs() {
             }}
           >
             The electroweak potential mapped simultaneously in physical space
-            near a Schwarzschild black hole and across electroweak field space —
-            revealing that the sombrero hat potential is position-dependent, with
-            the quartic coupling λ reduced to λ/5 at the spatial potential
-            minima.
+            near a Schwarzschild black hole and across the EW sector — with
+            dual ground/excited states, exact quartic coupling, and the λ/5
+            result derived from VEV conservation.
           </p>
         </header>
 
-        {/* ── Visualization ── */}
+        {/* ── Dual Potential Plot ── */}
         <div
           style={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            justifyContent: "center",
-            alignItems: "flex-start",
-            gap: isMobile ? 16 : 32,
-            padding: isMobile ? "24px 16px" : "40px 32px",
-            maxWidth: 1200,
+            maxWidth: 960,
             margin: "0 auto",
+            padding: isMobile ? "24px 16px" : "40px 32px",
           }}
         >
-          {/* Left: V(r) */}
-          <div>
-            <div
-              style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10,
-                letterSpacing: 3,
-                color: "rgba(0,212,255,0.6)",
-                textTransform: "uppercase",
-                marginBottom: 12,
-                textAlign: "center",
-              }}
-            >
-              Spatial Potential V(r)
-            </div>
-            <div
-              style={{
-                background: "rgba(8,12,24,0.7)",
-                border: "1px solid rgba(0,212,255,0.1)",
-                borderRadius: 8,
-                padding: 8,
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              {panelW > 0 && (
-                <SpatialPlot
-                  radialPos={radialPos}
-                  width={panelW}
-                  height={panelH}
-                />
-              )}
-            </div>
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                fontSize: 13,
-                fontStyle: "italic",
-                color: "rgba(180,200,220,0.4)",
-              }}
-            >
-              Deep well inside rₛ &nbsp;·&nbsp; Shallow well at accretion disk
-            </div>
+          <div
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10,
+              letterSpacing: 3,
+              color: "rgba(0,212,255,0.6)",
+              textTransform: "uppercase",
+              marginBottom: 12,
+              textAlign: "center",
+            }}
+          >
+            Dual Potential States U±(r) — Equation 32
           </div>
-
-          {/* Right: Sombrero */}
-          <div>
-            <div
-              style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10,
-                letterSpacing: 3,
-                color: "rgba(0,212,255,0.6)",
-                textTransform: "uppercase",
-                marginBottom: 12,
-                textAlign: "center",
-              }}
-            >
-              Electroweak Sombrero Potential
-            </div>
-            <div
-              style={{
-                background: "rgba(8,12,24,0.7)",
-                border: "1px solid rgba(0,212,255,0.1)",
-                borderRadius: 8,
-                padding: 8,
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              {panelW > 0 && (
-                <SombreroViz
-                  radialPos={radialPos}
-                  width={panelW}
-                  height={panelH}
-                />
-              )}
-            </div>
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                fontSize: 13,
-                fontStyle: "italic",
-                color: "rgba(180,200,220,0.4)",
-              }}
-            >
-              Shape morphs with radial position — VEV conserved
-            </div>
+          <div
+            style={{
+              background: "rgba(8,12,24,0.7)",
+              border: "1px solid rgba(0,212,255,0.1)",
+              borderRadius: 8,
+              padding: 8,
+              backdropFilter: "blur(10px)",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            {plotW > 0 && (
+              <DualPotentialPlot
+                radialPos={radialPos}
+                width={plotW}
+                height={plotH}
+              />
+            )}
+          </div>
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: 10,
+              fontSize: 13,
+              fontStyle: "italic",
+              color: "rgba(180,200,220,0.4)",
+            }}
+          >
+            U⁻ is ground state inside r₀ &nbsp;·&nbsp; U⁺ is ground state outside r₀ &nbsp;·&nbsp; They cross at the Schwarzschild radius
           </div>
         </div>
 
-        {/* ── Slider & Metrics ── */}
+        {/* ── Slider ── */}
         <div
           style={{
             maxWidth: 700,
@@ -789,14 +543,13 @@ export default function EmergentHiggs() {
               marginBottom: 6,
             }}
           >
-            <span>r = 0</span>
+            <span>r = r_min</span>
             <span style={{ color: "rgba(255,215,0,0.7)", fontSize: 13 }}>
-              r / rₛ = {radialPos.toFixed(2)}
+              r / r₀ = {radialPos.toFixed(3)}
             </span>
-            <span>r = 4rₛ</span>
+            <span>r = 4r₀</span>
           </div>
 
-          {/* Custom slider */}
           <div style={{ position: "relative", height: 32 }}>
             <div
               style={{
@@ -814,7 +567,7 @@ export default function EmergentHiggs() {
                 position: "absolute",
                 top: 14,
                 left: 0,
-                width: `${((radialPos - 0.05) / 3.95) * 100}%`,
+                width: `${((radialPos - R_MIN) / (4.0 - R_MIN)) * 100}%`,
                 height: 3,
                 background: "linear-gradient(90deg, #00d4ff, #ffd700)",
                 borderRadius: 2,
@@ -823,9 +576,9 @@ export default function EmergentHiggs() {
             />
             <input
               type="range"
-              min={0.05}
+              min={R_MIN + 0.001}
               max={4.0}
-              step={0.01}
+              step={0.001}
               value={radialPos}
               onChange={(e) => setRadialPos(parseFloat(e.target.value))}
               style={{
@@ -839,12 +592,11 @@ export default function EmergentHiggs() {
                 zIndex: 10,
               }}
             />
-            {/* Thumb indicator */}
             <div
               style={{
                 position: "absolute",
                 top: 8,
-                left: `calc(${((radialPos - 0.05) / 3.95) * 100}% - 8px)`,
+                left: `calc(${((radialPos - R_MIN) / (4.0 - R_MIN)) * 100}% - 8px)`,
                 width: 16,
                 height: 16,
                 borderRadius: "50%",
@@ -881,8 +633,6 @@ export default function EmergentHiggs() {
             flexWrap: "wrap",
           }}
         >
-          <LambdaGauge radialPos={radialPos} />
-
           <div style={{ textAlign: "center", padding: "0 16px" }}>
             <div
               style={{
@@ -894,31 +644,28 @@ export default function EmergentHiggs() {
                 textTransform: "uppercase",
               }}
             >
-              Higgs VEV
+              Ground State U
             </div>
             <div
               style={{
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
                 fontSize: 36,
                 fontWeight: 300,
-                color: "#e0e8f0",
+                color: "#ffd700",
                 lineHeight: 1,
               }}
             >
-              246
-              <span style={{ fontSize: 16, marginLeft: 4, color: "rgba(180,200,220,0.5)" }}>
-                GeV
-              </span>
+              {!isNaN(groundV) ? groundV.toFixed(3) : "—"}
             </div>
             <div
               style={{
                 fontFamily: "'IBM Plex Mono', monospace",
                 fontSize: 10,
-                color: "rgba(0,212,255,0.5)",
+                color: "rgba(255,215,0,0.5)",
                 marginTop: 12,
               }}
             >
-              CONSERVED ACROSS ALL r
+              {radialPos <= R_0 ? "U⁻ (INSIDE r₀)" : "U⁺ (OUTSIDE r₀)"}
             </div>
           </div>
 
@@ -933,25 +680,18 @@ export default function EmergentHiggs() {
                 textTransform: "uppercase",
               }}
             >
-              Spatial Potential
+              Excited State U
             </div>
             <div
               style={{
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
                 fontSize: 36,
                 fontWeight: 300,
-                color:
-                  spatialPotential(radialPos) < -0.3
-                    ? "#00d4ff"
-                    : spatialPotential(radialPos) > 0.3
-                    ? "#ff6666"
-                    : "#e0e8f0",
+                color: "rgba(180,200,220,0.6)",
                 lineHeight: 1,
-                transition: "color 0.5s ease",
               }}
             >
-              {spatialPotential(radialPos) > 0 ? "+" : ""}
-              {spatialPotential(radialPos).toFixed(3)}
+              {!isNaN(excitedV) ? excitedV.toFixed(3) : "—"}
             </div>
             <div
               style={{
@@ -961,7 +701,45 @@ export default function EmergentHiggs() {
                 marginTop: 12,
               }}
             >
-              V(r) AT CURRENT POSITION
+              {radialPos <= R_0 ? "U⁺ (INSIDE r₀)" : "U⁻ (OUTSIDE r₀)"}
+            </div>
+          </div>
+
+          <div style={{ textAlign: "center", padding: "0 16px" }}>
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+                color: "rgba(180,200,220,0.5)",
+                letterSpacing: 2,
+                marginBottom: 8,
+                textTransform: "uppercase",
+              }}
+            >
+              Region
+            </div>
+            <div
+              style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: 24,
+                fontWeight: 300,
+                color: radialPos <= R_0 ? "#00d4ff" : radialPos < R_A + 0.3 ? "#ffd700" : "#e0e8f0",
+                lineHeight: 1.2,
+                transition: "color 0.5s ease",
+                minWidth: 160,
+              }}
+            >
+              {regionLabel}
+            </div>
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                color: "rgba(180,200,220,0.3)",
+                marginTop: 12,
+              }}
+            >
+              r / r₀ = {radialPos.toFixed(3)}
             </div>
           </div>
         </div>
@@ -986,7 +764,7 @@ export default function EmergentHiggs() {
               marginBottom: 16,
             }}
           >
-            Central Result
+            Step 1 of 4 — Exact Dual Potential from Eq. 32
           </div>
           <p
             style={{
@@ -997,15 +775,11 @@ export default function EmergentHiggs() {
               margin: 0,
             }}
           >
-            The Schwarzschild metric emerges as a purely statistical structure
-            from stochastic spacetime. At the potential minima — inside the black
-            hole and at the accretion disk — the electroweak quartic coupling
-            shifts from{" "}
-            <span style={{ color: "#00d4ff", fontStyle: "italic" }}>λ</span> to{" "}
-            <span style={{ color: "#ffd700", fontStyle: "italic" }}>λ/5</span>,
-            a consequence of VEV conservation when scalar field perturbations
-            dominate. The Higgs field itself relates directly to stochastic
-            spacetime fields normalized by the Schwarzschild radius.
+            Two potential states U⁻ and U⁺ emerge from minimizing the
+            expected scalar field potential in spherical coordinates. They cross
+            at the Schwarzschild radius r₀. The ground state follows U⁻ inside
+            the black hole (deep well at r<sub>h</sub> ≈ 0.65r₀) and U⁺ outside
+            (shallow well at r<sub>a</sub> ≈ 3.10r₀ — the accretion disk).
           </p>
           <div
             style={{
