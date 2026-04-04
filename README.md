@@ -1,141 +1,223 @@
 # Emergent Higgs Field & the Schwarzschild Black Hole
 
-Interactive visualization of [Dragana Pilipovic's 2026 paper](https://www.mdpi.com/2571-712X/9/2/37#Abstract) exploring how the electroweak Higgs field emerges from stochastic spacetime perturbations inside a Schwarzschild black hole.
+An interactive companion to [Pilipovic (2026)](https://www.mdpi.com/2571-712X/9/2/37) — the paper proposing that the Higgs field emerges from stochastic spacetime perturbations inside a Schwarzschild black hole. Three modes of engagement: a structured paper walkthrough with LaTeX equations and interactive figures, a cinematic scroll-driven descent into a black hole, and a technical dashboard for parameter exploration.
 
-**The one-sentence version:** *This paper says the thing that gives everything mass is born inside black holes.*
+**Live:** [mjdevaccount.github.io/emergent-higgs-viz](https://mjdevaccount.github.io/emergent-higgs-viz/)
 
-## Two Ways to Experience It
+---
 
-The app has two modes, toggled via the button in the top-right corner.
+## Overview
 
-### Journey Mode (default)
+This project implements every key equation from the paper as verified, interactive visualizations. A single physics engine (`src/physics.js`, 44 passing tests) powers all three presentation modes. Equations are rendered with KaTeX. 3D visualizations use Three.js. No approximations — all constants and functions are derived directly from the published mathematics.
 
-A scroll-driven descent into a black hole. You start at a distant galaxy and fall inward. Every visual element is powered by the same exact equations from the paper — but rendered as physical metaphors instead of graphs.
+### The central result
 
-**Scroll down = fall in.** Your scroll position maps directly to radial distance `r/r₀` from the black hole center. The camera spirals inward over 2.5 rotations.
+At the potential minima inside the Schwarzschild sphere and at the accretion disk, the Standard Model quartic coupling shifts from λ to λ/5. This is not a free parameter — it follows from VEV conservation when Higgs perturbations dominate the scalar field (h² = 4v², Eq. 59). The electroweak VEV φ = 246 GeV is preserved everywhere.
 
-**Five distinct visual phases** — each section looks and feels completely different from the last:
+---
 
-| Phase | r range | What happens |
+## Three Modes
+
+### Paper Mode (default)
+
+A readable, scrollable document that follows the paper's structure. Each section pairs the relevant LaTeX equations with an interactive figure. A shared radial position slider at the top controls all figures simultaneously — drag it and every visualization across every section responds.
+
+**Sections:**
+
+| Section | Content | Interactive Figure |
 |---|---|---|
-| **Cosmos** | r > 3.5r₀ | Bright stars, small distant black hole, calm blue/white palette. |
-| **Accretion zone** | ~3.1r₀ | Stars dim. Accretion disk brightens dramatically. First gold flickers in the cyan. |
-| **Approach** | 3r₀ → r₀ | Stars stretch into radial lines. Black hole grows from 5% to 80% of viewport. |
-| **Crossing** | r₀ | Hard white flash. Stars vanish completely. Color palette inverts to gold-dominant. |
-| **Interior** | r₀ → 0.65r₀ | Dark, foggy, claustrophobic. Gold particles are the only bright things. |
+| §2 Framework | Stochastic spacetime, emergent Schwarzschild metric | Key radii table |
+| §3.1–3.2 Symmetry Breaking | Scalar field expansion, Eq. 32 | U±(r) dual potential (Figure 2) |
+| §3.3–3.4 Black Hole | Sombrero at r_h with λ/5, Eq. 38–40 | 3D sombrero potential |
+| §3.5 Sombrero Family | Position-dependent coupling, Eq. 48–51 | f(r) coupling plot (Figure 3) |
+| Spatial Map | EW potential mapped in physical space | Radial cross-section with sombrero profiles |
+| §3.6–3.7 Transition | Symmetry breaking at r_T, Eq. 52 | Transition diagram (Figure 4) |
+| §3.8 VEV Conservation | The λ/5 derivation, Eq. 55–63 | h² + v² = 246² breakdown |
+| §4 Entropy | Fokker–Planck parameters, Eq. 95–96 | α₁⁻ / α₂⁺ plot + Table 1 |
 
-**Visual elements:**
+**Features:**
+- Sticky table of contents with smooth scroll navigation
+- Global radial position slider synced across all sections
+- KaTeX-rendered equations with paper equation numbers
+- Copyable BibTeX citation block
 
-- **Black hole** (full viewport): A Three.js scene with a black sphere (event horizon), glowing edge shader, and rotating accretion disk ring. The black hole starts as a dot and grows to fill the screen. The accretion disk color shifts from cyan (vacuum) to gold (Higgs) as you cross the horizon — the color IS the VEV story.
+### Journey Mode
 
-- **1500 particles**: Instanced mesh particles spiral inward. Most get trapped at the core. Every few seconds, one escapes outward glowing gold — that's your 1.13% tunneling probability rendered as a visual event.
+A scroll-driven cinematic descent into a black hole. Every visual is powered by the same physics engine — the metaphors are the math.
 
-- **Depth gauge** (right side): Vertical progress bar with tick marks at each key radius — "the cosmos", "accretion disk", "event horizon", "symmetry breaks", "the core". A glowing dot tracks your position. You can see what's coming before you get there.
+**Five visual phases:**
 
-- **VEV balance bar** (bottom center): Thin horizontal bar — cyan (vacuum field) on the left, gold (Higgs field) on the right. Tips past 50% when you cross the horizon. The whole λ/5 story told silently.
+| Phase | What you see |
+|---|---|
+| **Cosmos** (r > 3.5r₀) | Bright stars, small distant black hole, calm palette |
+| **Accretion** (~3.1r₀) | Stars dim, disk brightens, first gold flickers |
+| **Approach** (3r₀ → r₀) | Stars stretch radially, black hole fills viewport (5% → 80%) |
+| **Crossing** (r₀) | Hard white flash, stars vanish, palette inverts to gold |
+| **Interior** (r₀ → 0.65r₀) | Dark, foggy, claustrophobic, gold particles only |
 
-- **Chapter cards**: Full-viewport centered text that fades in between visual sections — *"Far from the black hole, physics works the way we expect."* ... *"You cross the event horizon. There is no going back."*
+**Elements:**
+- Three.js black hole with edge glow shader and rotating accretion disk
+- 1500 instanced particles spiraling inward; 1.13% escape as gold streaks (tunneling probability)
+- Camera spirals in over 2.5 rotations, driven by scroll position
+- Depth gauge (right) with labeled tick marks at each key radius
+- VEV balance bar (bottom) — cyan/gold split that tips past 50% at the horizon
+- Chapter-break text cards between phases
+- Core reveal: darkness → *"Mass is born here."* → sombrero blooms
+- Post-credits tunneling: single gold particle escapes upward
+- Optional Web Audio drone (deepens with descent)
 
-- **Core reveal**: Screen goes dark. Pause. Then *"Mass is born here."* fades in gold. The sombrero potential blooms underneath — the black hole's interior literally becomes the Mexican hat potential.
+### Dashboard Mode
 
-- **Post-credits**: At the very bottom, everything goes still and dark. A single gold particle slowly drifts upward and escapes. *"1.13% chance of escape."*
+Traditional technical visualization. Seven interactive panels sharing a single slider for direct parameter exploration. Includes dual potential plot, coupling coefficient, 3D sombrero, lambda gauge with r-based regime labels, VEV conservation bar, transition/tunneling diagram, and entropy map with both α₁⁻ and α₂⁺.
 
-- **Sound** (off by default): Click the ♪ button to enable a Web Audio API drone that deepens as you descend. Subtle binaural beating effect.
+---
 
-### Technical Mode
+## Physics Engine
 
-The traditional scientific visualization with exact plots from the paper. All panels share a single radial position slider (`r/r₀`).
+All mathematics live in `src/physics.js`. Zero UI code. Every function maps to a specific paper equation.
 
-**Panels:**
+### Implemented equations
 
-- **Dual Potential U±(r)** — Equation 32. Both U⁺ and U⁻ curves plotted with the ground state highlighted in gold. U⁻ is the ground state inside `r₀`, U⁺ outside. They cross at the Schwarzschild radius. Five key radii are marked with dashed lines.
-
-- **Quartic Coupling f±(r)** — Equation 51. The position-dependent quartic coupling coefficient relative to the Standard Model λ. Reference lines at `f = 1` (SM) and `f = 1/5` (potential minima). Shows how the coupling drops at the deep well and accretion disk.
-
-- **3D Sombrero Potential** — Equations 48/49. A Three.js wireframe + solid surface of the electroweak sombrero hat potential. Shape morphs in real-time as the slider moves through r-space, driven by `Z±(r)`.
-
-- **Lambda Gauge** — Numeric readout of the ground-state coupling `f(r)` with a progress bar. Highlights gold when near a potential minimum (λ/5 regime).
-
-- **VEV Conservation** — Equations 55–62. Stacked bar showing h² (gold) + v² (cyan) = (246 GeV)² with numeric values. At `f = 1/5`: v ≈ 110 GeV, h ≈ 220 GeV. Contextual callout explains whether you're in the SM regime, transitional, or λ/5 regime.
-
-- **Transition & Tunneling Diagram** — Sections 3.6, 3.9. Schematic of the symmetry breaking path at `r_T ≈ 0.935r₀`: natural drop to the deep well at `rₕ` or tunneling (dashed, 1.13%) to the accretion disk at `rₐ`. Shows statistical entanglement between ψₛ and ψₐ for VEV conservation.
-
-- **Vacuum Entropy α₁** — Equations 95, 114. The Fokker–Planck parameter governing Higgs vacuum density evolution. Background shading shows entropy sign: green = positive entropy (inside Schwarzschild sphere), red = negative entropy (accretion region).
-
-## Key Physics
-
-All math lives in `src/physics.js`. Every constant is derived exactly from the paper — no approximations or hand-tuned curves.
-
-| Symbol | Value | Meaning |
+| Function | Paper Reference | Description |
 |---|---|---|
-| `R_MIN` | √(3/8) ≈ 0.612 r₀ | Minimum physical radius |
-| `R_H` | √(5−√21) ≈ 0.646 r₀ | Deep well minimum |
-| `R_T` | √(7/8) ≈ 0.935 r₀ | EW symmetry breaking transition |
-| `R_0` | 1.0 r₀ | Schwarzschild radius |
-| `R_A` | √(5+√21) ≈ 3.096 r₀ | Accretion disk minimum |
-| VEV | 246 GeV | Electroweak vacuum expectation value (conserved) |
-| Tunneling | 1.13% | \|ψₐ\|²/\|ψₛ\|² escape probability |
+| `potentialPlus(r)` / `potentialMinus(r)` | Eq. 32 | Dual potential states U±(r) |
+| `groundState(r)` / `excitedState(r)` | §3.2 | U⁻ inside r₀, U⁺ outside |
+| `sombreroZ(r)` | Eq. 49 | Shape parameter Z±(r) for sombrero family |
+| `sombreroHeight(φ₁, φ₂, r)` | Eq. 48 | Sombrero potential surface |
+| `couplingGround(r)` | Eq. 51 | Quartic coupling f±(r) = (2/3)(1/4 ∓ s)² / (r² + (1/4 ± s)) |
+| `vevBreakdown(r)` | Eq. 55–62 | h² + v² = 246² decomposition |
+| `alpha1Minus(r)` / `alpha1Plus(r)` | Eq. 95 | Fokker–Planck parameter α₁± |
+| `alpha2Plus(r)` / `alpha2Minus(r)` | Eq. 96 | Fokker–Planck parameter α₂± |
 
-**The central result:** At the potential minima (inside the black hole and at the accretion disk), the Standard Model quartic coupling λ is reduced to λ/5. This is not a free parameter — it follows directly from VEV conservation when Higgs perturbations dominate the scalar field (h² = 4v²).
+### Derived constants
 
-## Project Structure
+| Constant | Derivation | Value |
+|---|---|---|
+| `R_MIN` | √(3/8) r₀ | 0.6124 r₀ — minimum physical radius |
+| `R_H` | √(5 − √21) r₀ | 0.6461 r₀ — deep well minimum |
+| `R_T` | √(7/8) r₀ | 0.9354 r₀ — EW symmetry breaking transition |
+| `R_0` | r₀ | 1.0000 r₀ — Schwarzschild radius |
+| `R_A` | √(5 + √21) r₀ | 3.0956 r₀ — accretion disk minimum |
+| `TUNNEL_PROB` | §3.9 | 0.0113 — \|ψₐ\|²/\|ψₛ\|² tunneling probability |
+
+### Verification
+
+44 assertions in `tests/physics.test.js` covering:
+- All five derived radii against closed-form values
+- U±(r) crossing at r₀ (exact equality)
+- U⁻(r_h) = U⁺(r_a) = 3.750 (minima symmetry)
+- Ground/excited state assignment
+- Z(r_h) = Z(r_a) = 5/4 (Eq. 34)
+- f(r_h) = f(r_a) = 1/5 (the λ/5 result)
+- VEV conservation: v² + h² = 246² at all test points
+- α₁⁻ = 0 at r = 1/√2 (exact sign-change boundary)
+- α₁⁺ always positive
+
+```bash
+npm test    # 44 passed, 0 failed
+```
+
+---
+
+## Architecture
 
 ```
-index.html                      Vite entry point
-vite.config.js                  Vite + React plugin
-package.json                    Dependencies and scripts
+index.html                          Entry point (OG/Twitter meta, favicon)
+vite.config.js                      Vite + React, base path for GitHub Pages
+public/og-image.svg                 Social sharing preview card
 
 src/
-  main.jsx                      React root, page toggle between modes
-  App.jsx                       Technical mode layout and composition
-  PageToggle.jsx                Journey / Technical mode switcher
-  physics.js                    All equations from the paper, no UI code
+  main.jsx                          Root with three-mode toggle
+  physics.js                        Physics engine (all equations, no UI)
+  Paper.jsx                         Paper mode shell, shared state, TOC
+  App.jsx                           Dashboard mode layout
+  PageToggle.jsx                    Paper | Journey | Dashboard switcher
 
-  components/                   Technical mode panels
-    DualPotential.jsx           U±(r) canvas plot
-    CouplingPlot.jsx            f±(r) canvas plot
-    SombreroViz.jsx             Three.js sombrero wireframe
-    LambdaGauge.jsx             Coupling readout
-    VevBreakdown.jsx            h² + v² stacked bar
-    TransitionDiagram.jsx       Symmetry breaking schematic
-    EntropyMap.jsx              α₁ parameter plot
-    StarField.jsx               Animated star background
+  paper/                            Paper mode sections (11 files)
+    Eq.jsx                          KaTeX equation renderer
+    Header.jsx                      Title, author, abstract
+    Framework.jsx                   §2 — stochastic spacetime
+    SymmetryBreaking.jsx            §3.1–3.2 + Figure 2
+    BlackHole.jsx                   §3.3–3.4 + sombrero
+    SombreroFamily.jsx              §3.5 + Figure 3
+    SpatialMapSection.jsx           Radial spatial map (original)
+    Transition.jsx                  §3.6–3.7 + Figure 4
+    VevConservation.jsx             §3.8 — the central result
+    Entropy.jsx                     §4 + Figure 6 + Table 1
+    References.jsx                  Citations + BibTeX
 
-  journey/                      Journey mode experience
-    JourneyShell.jsx            Scroll container, phases, chapter cards
-    BlackHoleScene.jsx          Three.js black hole with all visual phases
-    particles.js                Instanced particle system (spiral + tunneling)
-    DepthGauge.jsx              Right-side vertical progress indicator
-    VevBar.jsx                  Bottom-center balance bar (cyan/gold)
-    SoundScape.jsx              Web Audio drone
+  components/                       Shared visualization components (9 files)
+    DualPotential.jsx               U±(r) 2D canvas plot
+    CouplingPlot.jsx                f(r) 2D canvas plot
+    SombreroViz.jsx                 Three.js 3D sombrero
+    SpatialMap.jsx                  Radial cross-section with sombrero profiles
+    LambdaGauge.jsx                 Coupling readout with regime labels
+    VevBreakdown.jsx                h²/v² stacked bar
+    TransitionDiagram.jsx           Symmetry breaking schematic
+    EntropyMap.jsx                  α₁⁻ + α₂⁺ parameter plot
+    StarField.jsx                   Animated star background
+
+  journey/                          Journey mode (6 files)
+    JourneyShell.jsx                Scroll container, phases, chapter cards
+    BlackHoleScene.jsx              Three.js scene (black hole, disk, glow)
+    particles.js                    1500 instanced particles + tunneling
+    DepthGauge.jsx                  Vertical progress indicator
+    VevBar.jsx                      Horizontal balance bar
+    SoundScape.jsx                  Web Audio API drone
+
+tests/
+  physics.test.js                   44 assertions against paper equations
 
 docs/
-  particles-09-00037.pdf        Source paper
-  particles-09-00037.md         Paper converted to markdown
+  particles-09-00037.pdf            Source paper
+  particles-09-00037.md             Markdown extraction
 ```
 
-## Getting Started
+---
+
+## Development
 
 ```bash
 npm install
-npm run dev       # http://localhost:5173
+npm run dev         # Development server with HMR
+npm run build       # Production build to dist/
+npm run preview     # Preview production build
+npm test            # Run physics verification tests
 ```
 
-```bash
-npm run build     # Production build to dist/
-npm run preview   # Preview the production build
+Requires Node.js 18+. Deployed to GitHub Pages via Actions on push to master.
+
+### Stack
+
+| Technology | Purpose |
+|---|---|
+| React 19 | Component architecture |
+| Three.js | 3D sombrero, black hole scene, instanced particles |
+| KaTeX | LaTeX equation rendering |
+| Vite | Build tooling, HMR, production bundling |
+| Web Audio API | Spatial audio (browser-native) |
+| Canvas 2D | Scientific plots (potential, coupling, entropy) |
+| GitHub Actions | CI/CD to GitHub Pages |
+
+---
+
+## Citation
+
+```bibtex
+@article{Pilipovic2026,
+  author  = {Pilipovi\'{c}, Dragana},
+  title   = {Emergent Higgs Field and the Schwarzschild Black Hole},
+  journal = {Particles},
+  volume  = {9},
+  number  = {2},
+  pages   = {37},
+  year    = {2026},
+  doi     = {10.3390/particles9020037}
+}
 ```
 
-Requires Node.js 18+.
+---
 
-## Dependencies
+## License
 
-- **React 19** — UI framework
-- **Three.js** — 3D black hole scene, sombrero, and sombrero wireframe
-- **Vite** — Dev server and bundler
-- **Web Audio API** — Sound (browser-native, no library)
-- **Google Fonts** — Cormorant Garamond (serif), IBM Plex Mono (monospace)
-
-## Reference
-
-Pilipovic, D. (2026). *Emergent Higgs Field and the Schwarzschild Black Hole.* Particles, 9(2), 37. [doi:10.3390/particles9020037](https://www.mdpi.com/2571-712X/9/2/37#Abstract)
+The source paper is published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). This visualization is open source.
