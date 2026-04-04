@@ -12,30 +12,35 @@ The app has two modes, toggled via the button in the top-right corner.
 
 A scroll-driven descent into a black hole. You start at a distant galaxy and fall inward. Every visual element is powered by the same exact equations from the paper — but rendered as physical metaphors instead of graphs.
 
-**Scroll down = fall in.** Your scroll position maps directly to radial distance `r/r₀` from the black hole center.
+**Scroll down = fall in.** Your scroll position maps directly to radial distance `r/r₀` from the black hole center. The camera spirals inward over 2.5 rotations.
 
-| Scroll position | Where you are | What you see |
+**Five distinct visual phases** — each section looks and feels completely different from the last:
+
+| Phase | r range | What happens |
 |---|---|---|
-| Top of page | Galaxy (`r ≈ 4r₀`) | Calm starfield. Standard Model reigns. |
-| ~25% | Accretion disk (`r ≈ 3.1r₀`) | Shallow moat in the terrain. First λ/5 point. |
-| ~50% | Exterior descent | Terrain rises toward the barrier ridge. |
-| ~65% | Event horizon (`r = r₀`) | The ridge. Ground/excited states swap. |
-| ~80% | Inside the black hole | VEV vessels start tipping. Fog deepens. |
-| Bottom | The core (`r ≈ 0.65r₀`) | Deep pit. Higgs field is born. Tunneling beat triggers. |
+| **Cosmos** | r > 3.5r₀ | Bright stars, small distant black hole, calm blue/white palette. |
+| **Accretion zone** | ~3.1r₀ | Stars dim. Accretion disk brightens dramatically. First gold flickers in the cyan. |
+| **Approach** | 3r₀ → r₀ | Stars stretch into radial lines. Black hole grows from 5% to 80% of viewport. |
+| **Crossing** | r₀ | Hard white flash. Stars vanish completely. Color palette inverts to gold-dominant. |
+| **Interior** | r₀ → 0.65r₀ | Dark, foggy, claustrophobic. Gold particles are the only bright things. |
 
 **Visual elements:**
 
-- **Terrain landscape** (full viewport): A Three.js cross-section of the potential `U(r)` rendered as physical terrain. The deep well is a literal pit, the Schwarzschild radius is a ridge, the accretion disk is a shallow moat. A glowing particle sits on the surface and tracks your position. Lighting, fog, and camera angle shift as you descend.
+- **Black hole** (full viewport): A Three.js scene with a black sphere (event horizon), glowing edge shader, and rotating accretion disk ring. The black hole starts as a dot and grows to fill the screen. The accretion disk color shifts from cyan (vacuum) to gold (Higgs) as you cross the horizon — the color IS the VEV story.
 
-- **VEV vessels** (bottom-left HUD): Two connected vessels labeled `v` and `h`. Outside the black hole, the `v` vessel (cyan) is full — the vacuum expectation value carries nearly all field energy. As you cross the horizon, liquid flows from `v` to `h` (gold) until h ≈ 220 GeV and v ≈ 110 GeV. The total φ = 246 GeV never changes. This is the λ/5 story told without equations — pure conservation you can see.
+- **1500 particles**: Instanced mesh particles spiral inward. Most get trapped at the core. Every few seconds, one escapes outward glowing gold — that's your 1.13% tunneling probability rendered as a visual event.
 
-- **Sombrero bowl** (bottom-right): A ceramic-looking bowl with a ball bearing in the rim. This is the electroweak "Mexican hat" potential. It warps in real-time as you scroll — wider and shallower at the potential minima (λ/5 regime), tighter and deeper at the barrier.
+- **Depth gauge** (right side): Vertical progress bar with tick marks at each key radius — "the cosmos", "accretion disk", "event horizon", "symmetry breaks", "the core". A glowing dot tracks your position. You can see what's coming before you get there.
 
-- **Narrative text** (bottom-left): Section-specific descriptions explaining what's happening at each stage of the descent, tied to the corresponding paper sections.
+- **VEV balance bar** (bottom center): Thin horizontal bar — cyan (vacuum field) on the left, gold (Higgs field) on the right. Tips past 50% when you cross the horizon. The whole λ/5 story told silently.
 
-- **Tunneling beat**: When you reach the core, a dramatic callout appears: *"You're trapped. Except..."* — explaining the 1.13% probability of a particle tunneling through the barrier to escape to the accretion disk.
+- **Chapter cards**: Full-viewport centered text that fades in between visual sections — *"Far from the black hole, physics works the way we expect."* ... *"You cross the event horizon. There is no going back."*
 
-- **Sound** (off by default): Click the ♪ button in the bottom-right to enable a low-frequency Web Audio drone that deepens as you descend. Subtle binaural beating effect.
+- **Core reveal**: Screen goes dark. Pause. Then *"Mass is born here."* fades in gold. The sombrero potential blooms underneath — the black hole's interior literally becomes the Mexican hat potential.
+
+- **Post-credits**: At the very bottom, everything goes still and dark. A single gold particle slowly drifts upward and escapes. *"1.13% chance of escape."*
+
+- **Sound** (off by default): Click the ♪ button to enable a Web Audio API drone that deepens as you descend. Subtle binaural beating effect.
 
 ### Technical Mode
 
@@ -97,14 +102,16 @@ src/
     StarField.jsx               Animated star background
 
   journey/                      Journey mode experience
-    JourneyShell.jsx            Scroll container, r mapping, narrative
-    TerrainViz.jsx              Three.js terrain landscape (hero)
-    SombreroBowl.jsx            Ceramic bowl + marble
-    VevHud.jsx                  Persistent VEV balance overlay
+    JourneyShell.jsx            Scroll container, phases, chapter cards
+    BlackHoleScene.jsx          Three.js black hole with all visual phases
+    particles.js                Instanced particle system (spiral + tunneling)
+    DepthGauge.jsx              Right-side vertical progress indicator
+    VevBar.jsx                  Bottom-center balance bar (cyan/gold)
     SoundScape.jsx              Web Audio drone
 
 docs/
   particles-09-00037.pdf        Source paper
+  particles-09-00037.md         Paper converted to markdown
 ```
 
 ## Getting Started
@@ -124,7 +131,7 @@ Requires Node.js 18+.
 ## Dependencies
 
 - **React 19** — UI framework
-- **Three.js** — 3D terrain, sombrero, and bowl rendering
+- **Three.js** — 3D black hole scene, sombrero, and sombrero wireframe
 - **Vite** — Dev server and bundler
 - **Web Audio API** — Sound (browser-native, no library)
 - **Google Fonts** — Cormorant Garamond (serif), IBM Plex Mono (monospace)
