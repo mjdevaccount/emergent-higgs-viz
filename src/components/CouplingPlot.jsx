@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import {
   R_MIN, R_H, R_0, R_A,
-  couplingPlus, couplingMinus, couplingGround,
+  couplingGround, sombreroZ,
 } from "../physics.js";
 
 export default function CouplingPlot({ radialPos, width, height }) {
@@ -26,20 +26,17 @@ export default function CouplingPlot({ radialPos, width, height }) {
     const rMin = R_MIN + 0.001;
     const rMax = 4.0;
     const steps = 400;
-    const pointsPlus = [];
-    const pointsMinus = [];
+    const pointsGround = [];
 
     for (let i = 0; i <= steps; i++) {
       const r = rMin + ((rMax - rMin) * i) / steps;
-      const fp = couplingPlus(r);
-      const fm = couplingMinus(r);
-      if (!isNaN(fp)) pointsPlus.push({ r, f: fp });
-      if (!isNaN(fm)) pointsMinus.push({ r, f: fm });
+      const fg = couplingGround(r);
+      if (!isNaN(fg)) pointsGround.push({ r, f: fg });
     }
 
-    // Y range: clamp to something readable (coupling can blow up)
-    const viewMin = -0.5;
-    const viewMax = 3.0;
+    // Y range: f ranges from ~0.15 to ~0.4
+    const viewMin = 0.0;
+    const viewMax = 0.5;
 
     const toX = (r) => pad.left + ((r - rMin) / (rMax - rMin)) * w;
     const toY = (f) => pad.top + h - ((f - viewMin) / (viewMax - viewMin)) * h;
@@ -125,16 +122,10 @@ export default function CouplingPlot({ radialPos, width, height }) {
       ctx.stroke();
     }
 
-    // f+ curve
-    ctx.shadowColor = "rgba(255,100,100,0.3)";
-    ctx.shadowBlur = 6;
-    drawCurve(pointsPlus, "rgba(255,120,120,0.6)", 1.5);
-    ctx.shadowBlur = 0;
-
-    // f- curve
-    ctx.shadowColor = "rgba(0,212,255,0.4)";
+    // Ground-state coupling curve
+    ctx.shadowColor = "rgba(255,215,0,0.4)";
     ctx.shadowBlur = 8;
-    drawCurve(pointsMinus, "#00d4ff", 2);
+    drawCurve(pointsGround, "#ffd700", 2.2);
     ctx.shadowBlur = 0;
 
     // Current position marker
@@ -155,10 +146,8 @@ export default function CouplingPlot({ radialPos, width, height }) {
     ctx.font = "10px 'IBM Plex Mono', monospace";
     ctx.textAlign = "right";
     const lx = pad.left + w - 6;
-    ctx.fillStyle = "#00d4ff";
-    ctx.fillText("── f⁻", lx, pad.top + 14);
-    ctx.fillStyle = "rgba(255,120,120,0.8)";
-    ctx.fillText("── f⁺", lx, pad.top + 28);
+    ctx.fillStyle = "#ffd700";
+    ctx.fillText("━━ f(r) ground state", lx, pad.top + 14);
 
     // Axes
     ctx.fillStyle = "rgba(180,200,220,0.6)";
@@ -169,14 +158,14 @@ export default function CouplingPlot({ radialPos, width, height }) {
     ctx.save();
     ctx.translate(14, pad.top + h / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText("f±(r) / λ_SM", 0, 0);
+    ctx.fillText("f(r) = 1/(4Z)", 0, 0);
     ctx.restore();
 
     // Y ticks
     ctx.fillStyle = "rgba(180,200,220,0.4)";
     ctx.font = "10px 'IBM Plex Mono', monospace";
     ctx.textAlign = "right";
-    for (let v = 0; v <= 3; v += 0.5) {
+    for (let v = 0; v <= 0.5; v += 0.1) {
       ctx.fillText(v.toFixed(1), pad.left - 6, toY(v) + 4);
     }
   }, [radialPos, width, height]);
