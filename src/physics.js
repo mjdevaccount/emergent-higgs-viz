@@ -90,3 +90,38 @@ export function sombreroHeight(phi1, phi2, r) {
   const phiSq = phi1 * phi1 + phi2 * phi2;
   return (-0.75 * z * phiSq + (1 / 16) * phiSq * phiSq) * 0.3;
 }
+
+// Tunneling probability (§3.9): |ψa|²/|ψs|² ≈ 1.13%
+export const TUNNEL_PROB = 0.0113;
+
+// Eq. 95: α₁± — governs Higgs vacuum density evolution
+// α₁�� ≈ (m²φ²/μ²v²){4 + (r₀²/r²)(3/2 ∓ 14√(r²/(2r₀²)−3/16))}
+// We factor out the m²φ²/μ²v² prefactor (≈ 16/45) and plot the shape.
+export function alpha1Minus(r) {
+  const s = sqrtTerm(r);
+  if (isNaN(s)) return NaN;
+  const r2 = r * r;
+  return 4 + (1 / r2) * (1.5 + 14 * s);
+}
+
+export function alpha1Plus(r) {
+  const s = sqrtTerm(r);
+  if (isNaN(s)) return NaN;
+  const r2 = r * r;
+  return 4 + (1 / r2) * (1.5 - 14 * s);
+}
+
+// Eq. 96: α₂± — second Fokker–Planck parameter
+export function alpha2Plus(r) {
+  const s = sqrtTerm(r);
+  if (isNaN(s)) return NaN;
+  const r2 = r * r;
+  return (1 / r2) * (6 - (1 / r2) * (4 * s + 3));
+}
+
+export function alpha2Minus(r) {
+  const s = sqrtTerm(r);
+  if (isNaN(s)) return NaN;
+  const r2 = r * r;
+  return (1 / r2) * (6 - (1 / r2) * (4 * s - 3));
+}

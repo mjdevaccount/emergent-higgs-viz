@@ -6,6 +6,8 @@ import CouplingPlot from "./CouplingPlot.jsx";
 import SombreroViz from "./SombreroViz.jsx";
 import LambdaGauge from "./LambdaGauge.jsx";
 import VevBreakdown from "./VevBreakdown.jsx";
+import TransitionDiagram from "./TransitionDiagram.jsx";
+import EntropyMap from "./EntropyMap.jsx";
 
 export default function EmergentHiggs() {
   const [radialPos, setRadialPos] = useState(2.0);
@@ -323,6 +325,39 @@ export default function EmergentHiggs() {
           <VevBreakdown radialPos={radialPos} />
         </section>
 
+        {/* ── Transition + Entropy side by side ── */}
+        <section
+          style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            gap: isMobile ? 16 : 32,
+            padding: isMobile ? "24px 16px" : "20px 32px",
+            maxWidth: 1200,
+            margin: "0 auto",
+          }}
+        >
+          <div>
+            <div style={sectionTitle}>Transition & Tunneling — §3.6, §3.9</div>
+            <div style={panelBox}>
+              {panelW > 0 && <TransitionDiagram width={panelW} height={panelH - 40} />}
+            </div>
+            <div style={caption}>
+              Natural drop to rₕ or tunneling to rₐ (1.13%)
+            </div>
+          </div>
+          <div>
+            <div style={sectionTitle}>Vacuum Entropy α₁ — Eq. 95, 114</div>
+            <div style={panelBox}>
+              {panelW > 0 && <EntropyMap radialPos={radialPos} width={panelW} height={panelH - 40} />}
+            </div>
+            <div style={caption}>
+              S &gt; 0 inside Schwarzschild sphere · S &lt; 0 in accretion region
+            </div>
+          </div>
+        </section>
+
         {/* ── Footer ── */}
         <div
           style={{
@@ -342,10 +377,14 @@ export default function EmergentHiggs() {
               margin: 0,
             }}
           >
-            Two potential states U⁻ and U⁺ emerge from minimizing the expected
-            scalar field potential. They cross at r₀. The quartic coupling f(r)
-            defines a position-dependent sombrero, dropping toward λ/5 at the
-            deep well (r<sub>h</sub> ≈ 0.65r₀) and accretion disk (r<sub>a</sub> ≈ 3.10r₀).
+            The Schwarzschild metric emerges as a statistical structure from
+            stochastic spacetime. Two potential states U⁻ and U⁺ cross at r₀,
+            defining a position-dependent sombrero where the quartic coupling
+            drops to λ/5 at the potential minima — a consequence of VEV
+            conservation when Higgs perturbations dominate. The two scalar
+            fields ψ<sub>s</sub> and ψ<sub>a</sub> are statistically entangled
+            to preserve the electroweak VEV, with 1.13% tunneling probability
+            from the deep well to the accretion disk.
           </p>
           <div
             style={{
