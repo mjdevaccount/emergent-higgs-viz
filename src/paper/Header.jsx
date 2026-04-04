@@ -1,7 +1,7 @@
 export default function Header() {
   return (
     <header style={container}>
-      <div style={tag}>Interactive Paper Companion</div>
+      <div style={tag}>Interactive Supplementary Material</div>
       <h1 style={title}>
         Emergent Higgs Field and the Schwarzschild Black Hole
       </h1>
@@ -15,6 +15,22 @@ export default function Header() {
         </a>
         {" · "}
         <span>Published 3 April 2026</span>
+      </div>
+
+      {/* Badges */}
+      <div style={badges}>
+        <a href="https://doi.org/10.3390/particles9020037" target="_blank" rel="noopener" style={badge}>
+          <span style={badgeLeft}>DOI</span>
+          <span style={badgeDoi}>10.3390/particles9020037</span>
+        </a>
+        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener" style={badge}>
+          <span style={badgeLeft}>license</span>
+          <span style={badgeCc}>CC BY 4.0</span>
+        </a>
+        <a href="https://github.com/mjdevaccount/emergent-higgs-viz/blob/master/tests/physics.test.js" target="_blank" rel="noopener" style={badge}>
+          <span style={badgeLeft}>tests</span>
+          <span style={badgePass}>44 passing</span>
+        </a>
       </div>
       <div style={abstractBox}>
         <div style={abstractLabel}>Abstract</div>
@@ -86,6 +102,47 @@ const meta = {
 const link = {
   color: "#00d4ff",
   textDecoration: "none",
+};
+
+const badges = {
+  display: "flex",
+  justifyContent: "center",
+  gap: 8,
+  flexWrap: "wrap",
+  marginTop: 16,
+};
+
+const badge = {
+  display: "inline-flex",
+  fontSize: 11,
+  fontFamily: "'IBM Plex Mono', monospace",
+  textDecoration: "none",
+  borderRadius: 3,
+  overflow: "hidden",
+};
+
+const badgeLeft = {
+  padding: "3px 6px",
+  background: "rgba(180,200,220,0.1)",
+  color: "rgba(180,200,220,0.6)",
+};
+
+const badgeDoi = {
+  padding: "3px 6px",
+  background: "rgba(0,212,255,0.15)",
+  color: "#00d4ff",
+};
+
+const badgeCc = {
+  padding: "3px 6px",
+  background: "rgba(0,180,80,0.15)",
+  color: "#00cc66",
+};
+
+const badgePass = {
+  padding: "3px 6px",
+  background: "rgba(0,180,80,0.15)",
+  color: "#00cc66",
 };
 
 const abstractBox = {
