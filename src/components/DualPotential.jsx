@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import {
   R_MIN, R_H, R_T, R_0, R_A,
   potentialPlus, potentialMinus, groundState,
-} from "./physics.js";
+} from "../physics.js";
 
 export default function DualPotentialPlot({ radialPos, width, height }) {
   const canvasRef = useRef(null);

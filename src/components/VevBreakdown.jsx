@@ -1,4 +1,4 @@
-import { VEV, vevBreakdown, R_0, R_H, R_A } from "./physics.js";
+import { VEV, vevBreakdown, R_0, R_H, R_A } from "../physics.js";
 
 export default function VevBreakdown({ radialPos }) {
   const { v, h, f } = vevBreakdown(radialPos);

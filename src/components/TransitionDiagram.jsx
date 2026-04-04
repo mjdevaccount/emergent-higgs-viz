@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { R_H, R_T, R_0, R_A, TUNNEL_PROB, groundState, excitedState } from "./physics.js";
+import { R_H, R_T, R_0, R_A, TUNNEL_PROB, groundState, excitedState } from "../physics.js";
 
 export default function TransitionDiagram({ width, height }) {
   const canvasRef = useRef(null);

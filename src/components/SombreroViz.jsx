@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
-import { sombreroHeight } from "./physics.js";
+import { sombreroHeight } from "../physics.js";
 
 export default function SombreroViz({ radialPos, width, height }) {
   const mountRef = useRef(null);

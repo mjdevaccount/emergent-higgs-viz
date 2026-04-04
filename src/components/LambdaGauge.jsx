@@ -1,4 +1,4 @@
-import { couplingGround } from "./physics.js";
+import { couplingGround } from "../physics.js";
 
 export default function LambdaGauge({ radialPos }) {
   const f = couplingGround(radialPos);

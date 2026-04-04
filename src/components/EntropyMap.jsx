@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { R_MIN, R_H, R_0, R_A, alpha1Minus, alpha1Plus } from "./physics.js";
+import { R_MIN, R_H, R_0, R_A, alpha1Minus, alpha1Plus } from "../physics.js";
 
 export default function EntropyMap({ radialPos, width, height }) {
   const canvasRef = useRef(null);

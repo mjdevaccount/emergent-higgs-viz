@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { R_MIN, R_0, R_A, R_H, groundState, excitedState } from "./physics.js";
-import StarField from "./StarField.jsx";
-import DualPotentialPlot from "./DualPotential.jsx";
-import CouplingPlot from "./CouplingPlot.jsx";
-import SombreroViz from "./SombreroViz.jsx";
-import LambdaGauge from "./LambdaGauge.jsx";
-import VevBreakdown from "./VevBreakdown.jsx";
-import TransitionDiagram from "./TransitionDiagram.jsx";
-import EntropyMap from "./EntropyMap.jsx";
+import StarField from "./components/StarField.jsx";
+import DualPotentialPlot from "./components/DualPotential.jsx";
+import CouplingPlot from "./components/CouplingPlot.jsx";
+import SombreroViz from "./components/SombreroViz.jsx";
+import LambdaGauge from "./components/LambdaGauge.jsx";
+import VevBreakdown from "./components/VevBreakdown.jsx";
+import TransitionDiagram from "./components/TransitionDiagram.jsx";
+import EntropyMap from "./components/EntropyMap.jsx";
 
 export default function EmergentHiggs() {
   const [radialPos, setRadialPos] = useState(2.0);
