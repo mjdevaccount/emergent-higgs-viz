@@ -70,20 +70,16 @@ export function sombreroZ(r) {
 }
 
 // VEV conservation (Eq. 55–62)
-// f ranges from 1/5 (at minima) to ~1/3 (SM limit at r→∞).
-// f is NOT monotonic — it dips back to 1/5 at the accretion disk.
-// The peak near r₀ (f≈0.63) is the closest to SM behavior.
-// Heuristic: map f linearly between F_MIN (all h) and F_PEAK (all v).
-// NOTE: intermediate values are approximate, not from a closed-form equation.
+// Paper Eq. 59: at minima h²=4v², v=110, h=220.
+// Paper Eq. 56: at SM (r >> r₀) v²>>h², v≈246, h≈0.
+// Interpolate based on r directly — f converges too slowly to be useful.
 export function vevBreakdown(r) {
   const f = couplingGround(r);
-  const F_MIN = 0.2;    // f at potential minima (rh, ra)
-  const F_PEAK = 0.63;  // f near r₀ (maximum, closest to SM)
-  if (isNaN(f) || f <= 0) return { v: 0, h: VEV, f };
-  const fNorm = Math.max(0, Math.min(1, (f - F_MIN) / (F_PEAK - F_MIN)));
-  const vSq = VEV * VEV * fNorm;
-  const hSq = VEV * VEV * (1 - fNorm);
-  return { v: Math.sqrt(Math.max(0, vSq)), h: Math.sqrt(Math.max(0, hSq)), f, fNorm };
+  // t: 0 at rh (deep well), 1 at ra and beyond (SM-like exterior)
+  const t = Math.min(1, Math.max(0, (r - R_H) / (R_A - R_H)));
+  const vSq = VEV * VEV * (0.2 + 0.8 * t);  // 20% at minima → 100% at SM
+  const hSq = VEV * VEV - vSq;
+  return { v: Math.sqrt(vSq), h: Math.sqrt(Math.max(0, hSq)), f };
 }
 
 export function sombreroHeight(phi1, phi2, r) {

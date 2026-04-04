@@ -158,7 +158,7 @@ export default function CouplingPlot({ radialPos, width, height }) {
     ctx.save();
     ctx.translate(14, pad.top + h / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText("f(r) = 1/(4Z)", 0, 0);
+    ctx.fillText("f±(r) — Eq. 51", 0, 0);
     ctx.restore();
 
     // Y ticks
