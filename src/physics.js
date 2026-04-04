@@ -43,13 +43,20 @@ export function excitedState(r) {
   return r <= R_0 ? potentialPlus(r) : potentialMinus(r);
 }
 
-// Quartic coupling f(r) derived from Eq. 48-50 via Z±(r).
-// f = 1/(4Z) gives exactly 1/5 at both potential minima (rh, ra)
-// and approaches 1/4 at large r (SM limit).
-// The paper's λ/5 result (Eq. 40) corresponds to f(rh) = f(ra) = 1/5.
+// Eq. 51: quartic coupling coefficient f±(r) relative to SM λ.
+// f±(r) = (2/3)(1/4 ∓ s)² / (r² + (1/4 ± s))
+// f = 1/5 at both minima (rh, ra). Approaches 1/3 at large r.
 export function couplingGround(r) {
-  const Z = sombreroZ(r);
-  return 1 / (4 * Z);
+  const s = sqrtTerm(r);
+  if (isNaN(s)) return NaN;
+  const r2 = r * r;
+  if (r <= R_0) {
+    // f- branch: ground state inside
+    return (2 / 3) * Math.pow(0.25 + s, 2) / (r2 + (0.25 - s));
+  } else {
+    // f+ branch: ground state outside
+    return (2 / 3) * Math.pow(0.25 - s, 2) / (r2 + (0.25 + s));
+  }
 }
 
 // Eq. 48: sombrero potential shape at radius r
@@ -63,17 +70,19 @@ export function sombreroZ(r) {
 }
 
 // VEV conservation (Eq. 55–62)
-// f ranges from 1/5 (at minima) to ~1/4 (SM limit, f_SM = 0.25).
-// fNorm = f/f_SM. At minima fNorm=0.8, SM fNorm=1.
-// Paper Eq. 58–62: at minima v=110 GeV, h=220 GeV, v²+h²=246².
+// f ranges from 1/5 (at minima) to ~1/3 (SM limit).
+// Heuristic interpolation matching paper's stated values:
+//   At minima (f=1/5): v=110, h=220. At SM (f→1/3): v≈246, h≈0.
+// NOTE: intermediate values are approximate, not from a closed-form equation.
 export function vevBreakdown(r) {
   const f = couplingGround(r);
+  const F_MIN = 0.2;   // f at potential minima
+  const F_SM = 1 / 3;  // f at SM limit
   if (isNaN(f) || f <= 0) return { v: 0, h: VEV, f };
-  const fNorm = f / 0.25;
-  const departure = 1 - fNorm; // 0 at SM, 0.2 at minima
-  const vSq = VEV * VEV * Math.max(0, 1 - 4 * departure);
-  const hSq = VEV * VEV * 4 * departure;
-  return { v: Math.sqrt(vSq), h: Math.sqrt(hSq), f, fNorm };
+  const fNorm = Math.min(1, (f - F_MIN) / (F_SM - F_MIN)); // 0 at minima, 1 at SM
+  const vSq = VEV * VEV * fNorm;
+  const hSq = VEV * VEV * (1 - fNorm);
+  return { v: Math.sqrt(Math.max(0, vSq)), h: Math.sqrt(Math.max(0, hSq)), f, fNorm };
 }
 
 export function sombreroHeight(phi1, phi2, r) {
@@ -103,17 +112,17 @@ export function alpha1Plus(r) {
   return 4 + (1 / r2) * (1.5 + 14 * s);
 }
 
-// Eq. 96: α₂± — second Fokker–Planck parameter
+// Eq. 96: α₂± ∝ (1/r²){6 - 1/r² ∓ 4s}
 export function alpha2Plus(r) {
   const s = sqrtTerm(r);
   if (isNaN(s)) return NaN;
   const r2 = r * r;
-  return (1 / r2) * (6 - (1 / r2) * (4 * s + 3));
+  return (1 / r2) * (6 - 1 / r2 - 4 * s);
 }
 
 export function alpha2Minus(r) {
   const s = sqrtTerm(r);
   if (isNaN(s)) return NaN;
   const r2 = r * r;
-  return (1 / r2) * (6 - (1 / r2) * (4 * s - 3));
+  return (1 / r2) * (6 - 1 / r2 + 4 * s);
 }

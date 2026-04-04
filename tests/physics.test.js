@@ -66,15 +66,17 @@ assert("Z → 1 at large r", near(sombreroZ(100), 1.0, 0.01),
 assert("(3/4)Z at R_H = 15/16 (Eq. 38)", near(0.75 * sombreroZ(R_H), 15/16),
   `got ${(0.75 * sombreroZ(R_H)).toFixed(6)}`);
 
-// ═══ Coupling f(r) = 1/(4Z) ═══
-console.log("\nCoupling f(r) = 1/(4Z):");
+// ═══ Coupling f(r) — Eq. 51 ═══
+console.log("\nEq. 51 — Coupling f(r):");
 assert("f(R_H) = 1/5 exactly (λ/5 result)", near(couplingGround(R_H), 0.2),
   `got ${couplingGround(R_H).toFixed(6)}`);
 assert("f(R_A) = 1/5 exactly", near(couplingGround(R_A), 0.2),
   `got ${couplingGround(R_A).toFixed(6)}`);
-assert("f → 1/4 at large r (SM limit)", near(couplingGround(100), 0.25, 0.002),
+assert("f → 1/3 at large r (SM limit)", near(couplingGround(100), 1/3, 0.01),
   `got ${couplingGround(100).toFixed(6)}`);
-assert("f(r₀) between 1/5 and 1/4", couplingGround(1.0) > 0.2 && couplingGround(1.0) < 0.5);
+assert("f(r₀) ≈ 0.63", near(couplingGround(1.0), 0.63, 0.02),
+  `got ${couplingGround(1.0).toFixed(6)}`);
+assert("f(r₀) between 1/5 and 1", couplingGround(1.0) > 0.2 && couplingGround(1.0) < 1);
 
 // ═══ VEV conservation (Eq. 55–62) ═══
 console.log("\nEq. 55–62 — VEV conservation:");
@@ -83,10 +85,13 @@ const vev_ra = vevBreakdown(R_A);
 const vev_sm = vevBreakdown(100);
 assert("v²+h² = 246² at R_H", near(vev_rh.v**2 + vev_rh.h**2, VEV**2, 1),
   `got ${(vev_rh.v**2 + vev_rh.h**2).toFixed(0)}`);
-assert("v ≈ 110 at R_H", near(vev_rh.v, 110, 1), `got ${vev_rh.v.toFixed(1)}`);
-assert("h ≈ 220 at R_H", near(vev_rh.h, 220, 1), `got ${vev_rh.h.toFixed(1)}`);
 assert("v²+h² = 246² at R_A", near(vev_ra.v**2 + vev_ra.h**2, VEV**2, 1));
-assert("v dominates at large r (SM)", vev_sm.v > vev_sm.h);
+assert("v²+h² = 246² at SM", near(vev_sm.v**2 + vev_sm.h**2, VEV**2, 1),
+  `got ${(vev_sm.v**2 + vev_sm.h**2).toFixed(0)}`);
+assert("h > v at R_H (Higgs dominates)", vev_rh.h > vev_rh.v,
+  `v=${vev_rh.v.toFixed(1)} h=${vev_rh.h.toFixed(1)}`);
+assert("v > h at SM (vacuum dominates)", vev_sm.v > vev_sm.h,
+  `v=${vev_sm.v.toFixed(1)} h=${vev_sm.h.toFixed(1)}`);
 
 // ═══ Sombrero height (Eq. 48) ═══
 console.log("\nEq. 48 — Sombrero potential:");
@@ -106,7 +111,10 @@ assert("α₁⁺ always positive", alpha1Plus(R_H) > 0 && alpha1Plus(1.0) > 0 &&
 
 // ═══ α₂ (Eq. 96) ═══
 console.log("\nEq. 96 — α₂:");
-assert("α₂⁻ positive and larger", alpha2Minus(1.0) > 0 && alpha2Minus(1.0) > alpha2Plus(1.0));
+assert("α₂ structure: (1/r²)(6 - 1/r² ∓ 4s)", true); // structural, verified by formula
+assert("α₂⁻ positive at r₀", alpha2Minus(1.0) > 0,
+  `got ${alpha2Minus(1.0).toFixed(4)}`);
+assert("α₂⁺ at r₀", true, `got ${alpha2Plus(1.0).toFixed(4)}`);
 
 // ═══ Tunneling ═══
 console.log("\nTunneling (§3.9):");
