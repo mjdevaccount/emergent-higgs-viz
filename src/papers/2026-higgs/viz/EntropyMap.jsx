@@ -1,10 +1,10 @@
 import { useRef, useEffect } from "react";
 import { R_MIN, R_H, R_0, R_A, alpha1Minus, alpha1Plus, alpha2Plus } from "../physics.js";
-import { colors, rgba, canvas as canvasFonts } from "../theme.js";
+import { colors, rgba, canvas as canvasFonts } from "@/theme.js";
 import {
   setupCanvas, makeScales, drawRefLines, drawMarker,
   drawLegend, drawAxes, drawYTicks, drawCurve, drawHLine,
-} from "../canvas-utils.js";
+} from "@/canvas-utils.js";
 
 export default function EntropyMap({ radialPos, width, height }) {
   const canvasRef = useRef(null);

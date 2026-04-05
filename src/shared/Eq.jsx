@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import katex from "katex";
-import { styles } from "../theme.js";
+import { styles } from "@/theme.js";
 
 export default function Eq({ tex, display = false, num }) {
   const html = useMemo(() => {

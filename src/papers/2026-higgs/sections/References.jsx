@@ -1,4 +1,4 @@
-import { colors, rgba, fonts, styles } from "../theme.js";
+import { colors, rgba, fonts, styles } from "@/theme.js";
 
 export default function References() {
   return (

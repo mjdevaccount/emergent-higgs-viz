@@ -1,10 +1,10 @@
 import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
-import Eq from "./Eq.jsx";
-import HoverTerm from "./HoverTerm.jsx";
-import { TERMS } from "./highlight.js";
-import SombreroViz from "../components/SombreroViz.jsx";
-import { colors, styles } from "../theme.js";
+import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { TERMS } from "../highlight.js";
+import SombreroViz from "../viz/SombreroViz.jsx";
+import { colors, styles } from "@/theme.js";
 
 export default function BlackHole({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);

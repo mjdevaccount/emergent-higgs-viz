@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { R_MIN } from "../physics.js";
-import Eq from "./Eq.jsx";
-import EntropyMap from "../components/EntropyMap.jsx";
-import { colors, rgba, fonts, styles } from "../theme.js";
+import Eq from "@/shared/Eq.jsx";
+import EntropyMap from "../viz/EntropyMap.jsx";
+import { colors, rgba, fonts, styles } from "@/theme.js";
 
 export default function Entropy({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);

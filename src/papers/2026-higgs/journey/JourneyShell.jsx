@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { R_MIN, R_H, R_T, R_0, R_A } from "../physics.js";
-import { colors, rgba, fonts, styles as themeStyles } from "../theme.js";
+import { colors, rgba, fonts, styles as themeStyles } from "@/theme.js";
 import BlackHoleScene from "./BlackHoleScene.jsx";
 import DepthGauge from "./DepthGauge.jsx";
 import VevBar from "./VevBar.jsx";
@@ -23,7 +23,7 @@ const CHAPTERS = [
   { rBelow: 0.93, rAbove: 0.75, text: "Inside, the rules change.\nThe Higgs perturbation grows.\nThe vacuum shrinks." },
 ];
 
-export default function JourneyShell() {
+export default function JourneyShell({ onBack }) {
   const [r, setR] = useState(R_TOP);
   const [soundOn, setSoundOn] = useState(false);
   const [darkBeat, setDarkBeat] = useState(false);
@@ -180,6 +180,13 @@ export default function JourneyShell() {
       {/* HUD elements — outside fixed layer for clickability */}
       <DepthGauge radialPos={r} />
       <VevBar radialPos={r} />
+
+      {/* Back to paper */}
+      {onBack && (
+        <button onClick={onBack} style={{ ...themeStyles.pillButton(false), position: "fixed", top: 16, left: 16, zIndex: 1000 }}>
+          ← Paper
+        </button>
+      )}
 
       {/* Sound */}
       <button onClick={() => setSoundOn(!soundOn)} style={soundBtn(soundOn)}>

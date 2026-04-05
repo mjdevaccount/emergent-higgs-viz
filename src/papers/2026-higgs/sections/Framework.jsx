@@ -1,8 +1,8 @@
 import { R_MIN, R_H, R_T, R_0, R_A } from "../physics.js";
-import Eq from "./Eq.jsx";
-import HoverTerm from "./HoverTerm.jsx";
-import { TERMS } from "./highlight.js";
-import { colors, rgba, fonts, styles } from "../theme.js";
+import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { TERMS } from "../highlight.js";
+import { colors, rgba, fonts, styles } from "@/theme.js";
 
 export default function Framework() {
   return (

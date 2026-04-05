@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useHighlight } from "./HighlightContext.jsx";
-import { colors, rgba } from "../theme.js";
+import { colors, rgba } from "@/theme.js";
 
 /**
  * Wrap any inline content (typically <Eq />) to make it hoverable.

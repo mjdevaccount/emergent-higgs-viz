@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback } from "react";
 import { R_0 } from "../physics.js";
-import { colors, rgba, fonts, styles as themeStyles } from "../theme.js";
+import { colors, rgba, fonts, styles as themeStyles } from "@/theme.js";
 
 // Low-frequency drone that deepens as you descend toward the core.
 // Muted by default — user must click to enable.

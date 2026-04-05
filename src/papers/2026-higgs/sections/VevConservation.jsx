@@ -1,10 +1,10 @@
 import { R_MIN } from "../physics.js";
-import Eq from "./Eq.jsx";
-import HoverTerm from "./HoverTerm.jsx";
-import { useHighlight } from "./HighlightContext.jsx";
-import { TERMS } from "./highlight.js";
-import VevBreakdown from "../components/VevBreakdown.jsx";
-import { colors, rgba, fonts, styles } from "../theme.js";
+import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { useHighlight } from "@/shared/HighlightContext.jsx";
+import { TERMS } from "../highlight.js";
+import VevBreakdown from "../viz/VevBreakdown.jsx";
+import { colors, rgba, fonts, styles } from "@/theme.js";
 
 export default function VevConservation({ radialPos, onChangeR }) {
   const { active } = useHighlight();

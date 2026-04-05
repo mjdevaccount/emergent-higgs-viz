@@ -1,5 +1,5 @@
 import { couplingGround, R_T, R_0, R_A } from "../physics.js";
-import { colors, rgba, styles } from "../theme.js";
+import { colors, rgba, styles } from "@/theme.js";
 
 export default function LambdaGauge({ radialPos }) {
   const f = couplingGround(radialPos);

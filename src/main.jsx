@@ -1,21 +1,17 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import Paper from "./Paper.jsx";
-import EmergentHiggs from "./App.jsx";
-import JourneyShell from "./journey/JourneyShell.jsx";
-import PageToggle from "./PageToggle.jsx";
+import Higgs2026 from "./papers/2026-higgs/index.jsx";
+import JourneyShell from "./papers/2026-higgs/journey/JourneyShell.jsx";
 
 function Root() {
-  const [mode, setMode] = useState("paper");
+  const [journey, setJourney] = useState(false);
 
-  return (
-    <>
-      <PageToggle mode={mode} onToggle={setMode} />
-      {mode === "paper" && <Paper />}
-      {mode === "journey" && <JourneyShell />}
-      {mode === "dashboard" && <EmergentHiggs />}
-    </>
-  );
+  // For now, single paper — will become a paper selector/timeline later
+  if (journey) {
+    return <JourneyShell onBack={() => setJourney(false)} />;
+  }
+
+  return <Higgs2026 onToggleJourney={() => setJourney(true)} />;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(

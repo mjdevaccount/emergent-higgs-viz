@@ -1,6 +1,6 @@
 import { VEV, vevBreakdown } from "../physics.js";
-import { isVevGlowing } from "../paper/highlight.js";
-import { colors, rgba, styles } from "../theme.js";
+import { isVevGlowing } from "../highlight.js";
+import { colors, rgba, styles } from "@/theme.js";
 
 export default function VevBreakdown({ radialPos, highlight }) {
   const { v, h, f } = vevBreakdown(radialPos);

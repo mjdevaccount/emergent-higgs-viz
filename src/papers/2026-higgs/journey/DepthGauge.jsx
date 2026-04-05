@@ -1,5 +1,5 @@
 import { R_H, R_T, R_0, R_A, R_MIN } from "../physics.js";
-import { colors, rgba, fonts } from "../theme.js";
+import { colors, rgba, fonts } from "@/theme.js";
 
 const TICKS = [
   { r: 4.0, label: "the cosmos", color: colors.textFaint },

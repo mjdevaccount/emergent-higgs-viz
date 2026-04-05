@@ -1,9 +1,9 @@
 import { useRef, useEffect, useState } from "react";
-import Eq from "./Eq.jsx";
-import HoverTerm from "./HoverTerm.jsx";
-import { TERMS } from "./highlight.js";
-import TransitionDiagram from "../components/TransitionDiagram.jsx";
-import { styles } from "../theme.js";
+import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { TERMS } from "../highlight.js";
+import TransitionDiagram from "../viz/TransitionDiagram.jsx";
+import { styles } from "@/theme.js";
 
 export default function Transition() {
   const [width, setWidth] = useState(0);

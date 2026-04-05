@@ -1,8 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
-import Eq from "./Eq.jsx";
-import CouplingPlot from "../components/CouplingPlot.jsx";
-import { colors, styles } from "../theme.js";
+import Eq from "@/shared/Eq.jsx";
+import CouplingPlot from "../viz/CouplingPlot.jsx";
+import { colors, styles } from "@/theme.js";
 
 export default function SombreroFamily({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);

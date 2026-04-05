@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { R_H, R_T, R_0, R_A, TUNNEL_PROB } from "../physics.js";
-import { colors, rgba, canvas as canvasFonts } from "../theme.js";
-import { setupCanvas } from "../canvas-utils.js";
+import { colors, rgba, canvas as canvasFonts } from "@/theme.js";
+import { setupCanvas } from "@/canvas-utils.js";
 
 export default function TransitionDiagram({ width, height }) {
   const canvasRef = useRef(null);

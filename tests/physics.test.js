@@ -7,7 +7,7 @@ import {
   couplingGround, sombreroZ, vevBreakdown, sombreroHeight,
   alpha1Minus, alpha1Plus, alpha2Plus, alpha2Minus,
   TUNNEL_PROB,
-} from "../src/physics.js";
+} from "../src/papers/2026-higgs/physics.js";
 
 let passed = 0, failed = 0;
 

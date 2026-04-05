@@ -1,5 +1,5 @@
 import { VEV, vevBreakdown } from "../physics.js";
-import { colors, fonts } from "../theme.js";
+import { colors, fonts } from "@/theme.js";
 
 // Thin horizontal bar: cyan (vacuum) left, gold (Higgs) right.
 // Tips past 50% inside the horizon. Dead simple.

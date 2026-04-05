@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
-import Eq from "./Eq.jsx";
-import SpatialMap from "../components/SpatialMap.jsx";
-import { colors, rgba, styles } from "../theme.js";
+import Eq from "@/shared/Eq.jsx";
+import SpatialMap from "../viz/SpatialMap.jsx";
+import { colors, rgba, styles } from "@/theme.js";
 
 export default function SpatialMapSection() {
   const [width, setWidth] = useState(0);

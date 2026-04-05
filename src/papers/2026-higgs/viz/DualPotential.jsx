@@ -3,12 +3,12 @@ import {
   R_MIN, R_H, R_T, R_0, R_A,
   potentialPlus, potentialMinus, groundState,
 } from "../physics.js";
-import { TERMS, isRadiusHighlighted } from "../paper/highlight.js";
-import { colors, rgba } from "../theme.js";
+import { TERMS, isRadiusHighlighted } from "../highlight.js";
+import { colors, rgba } from "@/theme.js";
 import {
   setupCanvas, makeScales, drawGrid, drawRefLines,
   drawMarker, drawLegend, drawAxes, drawXTicks, drawYTicks,
-} from "../canvas-utils.js";
+} from "@/canvas-utils.js";
 
 export default function DualPotentialPlot({ radialPos, width, height, highlight }) {
   const canvasRef = useRef(null);

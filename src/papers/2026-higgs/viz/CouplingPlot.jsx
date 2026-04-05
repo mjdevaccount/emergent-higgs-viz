@@ -1,10 +1,10 @@
 import { useRef, useEffect } from "react";
 import { R_MIN, R_H, R_0, R_A, couplingGround } from "../physics.js";
-import { colors, rgba } from "../theme.js";
+import { colors, rgba } from "@/theme.js";
 import {
   setupCanvas, makeScales, drawGrid, drawRefLines,
   drawMarker, drawLegend, drawAxes, drawYTicks, drawCurve, drawHLine,
-} from "../canvas-utils.js";
+} from "@/canvas-utils.js";
 
 export default function CouplingPlot({ radialPos, width, height }) {
   const canvasRef = useRef(null);

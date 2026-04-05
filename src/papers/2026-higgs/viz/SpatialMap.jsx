@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { R_MIN, R_H, R_T, R_0, R_A, sombreroHeight } from "../physics.js";
-import { colors, rgba, canvas as canvasFonts } from "../theme.js";
-import { setupCanvas } from "../canvas-utils.js";
+import { colors, rgba, canvas as canvasFonts } from "@/theme.js";
+import { setupCanvas } from "@/canvas-utils.js";
 
 // Top-down radial map: concentric rings at key radii with tiny
 // sombrero profiles drawn at each. "The whole paper in one image."

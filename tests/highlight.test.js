@@ -6,7 +6,7 @@
 import {
   TERMS, ALL_TERMS, TERM_CONSUMERS,
   isRadiusHighlighted, isVevGlowing,
-} from "../src/paper/highlight.js";
+} from "../src/papers/2026-higgs/highlight.js";
 
 let passed = 0, failed = 0;
 
