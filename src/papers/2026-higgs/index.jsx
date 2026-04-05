@@ -27,7 +27,7 @@ const TOC = [
 
 const anchor = { scrollMarginTop: 60 };
 
-export default function Higgs2026({ onToggleJourney }) {
+export default function Higgs2026({ onToggleJourney, onBack }) {
   const [r, setR] = useState(meta.paramDefault);
 
   return (
@@ -38,6 +38,7 @@ export default function Higgs2026({ onToggleJourney }) {
         param={r}
         onParam={setR}
         onToggleJourney={onToggleJourney}
+        onBack={onBack}
       >
         <div id="framework" style={anchor}><Framework /></div>
         <div id="symmetry" style={anchor}><SymmetryBreaking radialPos={r} onChangeR={setR} /></div>

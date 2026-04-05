@@ -16,7 +16,7 @@ import StarField from "@/shared/StarField.jsx";
  *   onParam  — slider change handler
  *   onToggleJourney — if set, shows a "Journey" button
  */
-export default function PaperShell({ meta, toc, children, param, onParam, onToggleJourney }) {
+export default function PaperShell({ meta, toc, children, param, onParam, onToggleJourney, onBack }) {
   return (
     <div style={container}>
       <link
@@ -28,6 +28,9 @@ export default function PaperShell({ meta, toc, children, param, onParam, onTogg
 
       {/* Sticky nav */}
       <div style={stickyNav}>
+        {onBack && (
+          <button onClick={onBack} style={backBtn}>&larr;</button>
+        )}
         <span style={sliderValue}>{meta.paramLabel} = {param.toFixed(3)}</span>
         <input
           type="range"
@@ -107,6 +110,17 @@ const container = {
   paddingTop: 56,
   position: "relative",
   overflow: "hidden",
+};
+
+const backBtn = {
+  fontFamily: fonts.mono,
+  fontSize: 14,
+  color: rgba(colors.cyan, 0.5),
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  padding: "2px 8px 2px 0",
+  marginRight: 4,
 };
 
 const stickyNav = {

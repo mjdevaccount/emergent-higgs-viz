@@ -1,17 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
-import Higgs2026 from "./papers/2026-higgs/index.jsx";
-import JourneyShell from "./papers/2026-higgs/journey/JourneyShell.jsx";
+import papers from "./papers/registry.js";
+import Timeline from "./shared/Timeline.jsx";
 
 function Root() {
-  const [journey, setJourney] = useState(false);
+  const [selected, setSelected] = useState(null);  // paper object or null
+  const [mode, setMode] = useState("paper");        // "paper" | "journey"
+  const [PaperComponent, setPaperComponent] = useState(null);
+  const [JourneyComponent, setJourneyComponent] = useState(null);
 
-  // For now, single paper — will become a paper selector/timeline later
-  if (journey) {
-    return <JourneyShell onBack={() => setJourney(false)} />;
+  // Lazy-load the selected paper's component
+  useEffect(() => {
+    if (!selected) {
+      setPaperComponent(null);
+      setJourneyComponent(null);
+      return;
+    }
+    selected.load().then((mod) => setPaperComponent(() => mod.default));
+    if (selected.loadJourney) {
+      selected.loadJourney().then((mod) => setJourneyComponent(() => mod.default));
+    }
+  }, [selected]);
+
+  // Timeline / landing page
+  if (!selected || !PaperComponent) {
+    return <Timeline papers={papers} onSelect={(p) => { setSelected(p); setMode("paper"); }} />;
   }
 
-  return <Higgs2026 onToggleJourney={() => setJourney(true)} />;
+  // Journey mode
+  if (mode === "journey" && JourneyComponent) {
+    return <JourneyComponent onBack={() => setMode("paper")} />;
+  }
+
+  // Paper mode
+  return (
+    <PaperComponent
+      onToggleJourney={selected.hasJourney ? () => setMode("journey") : undefined}
+      onBack={() => setSelected(null)}
+    />
+  );
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(

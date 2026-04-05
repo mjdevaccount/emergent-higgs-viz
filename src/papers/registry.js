@@ -1,0 +1,49 @@
+// ── Paper registry ───────────────────────────────────────────────
+// Central list of all papers. main.jsx uses this to render the
+// timeline and route to the correct paper component.
+//
+// To add a paper: import its meta.js here and add to the array.
+// Papers are displayed in chronological order.
+
+import higgs2026 from "./2026-higgs/meta.js";
+
+const papers = [
+  {
+    ...higgs2026,
+    // Lazy-load the paper component to keep initial bundle small
+    load: () => import("./2026-higgs/index.jsx"),
+    loadJourney: () => import("./2026-higgs/journey/JourneyShell.jsx"),
+    color: "#ffd700",     // Timeline accent color
+    tagline: "Mass is born inside the black hole.",
+  },
+  // ── Future papers (uncomment as implemented) ──
+  // {
+  //   id: "2024-universe",
+  //   year: 2024,
+  //   shortTitle: "Infinitely Old Universe",
+  //   ...universe2024,
+  //   load: () => import("./2024-universe/index.jsx"),
+  //   color: "#00d4ff",
+  //   tagline: "An asymptotically static universe, with a Big Bang in between.",
+  // },
+  // {
+  //   id: "2024-symmetry",
+  //   year: 2024,
+  //   shortTitle: "Stochastic Spacetime",
+  //   ...symmetry2024,
+  //   load: () => import("./2024-symmetry/index.jsx"),
+  //   color: "#00ff8c",
+  //   tagline: "Spacetime carries a fundamental uncertainty at Planck scale.",
+  // },
+  // {
+  //   id: "2023-hubble",
+  //   year: 2023,
+  //   shortTitle: "Hubble Tension",
+  //   ...hubble2023,
+  //   load: () => import("./2023-hubble/index.jsx"),
+  //   color: "#ff6b6b",
+  //   tagline: "Dark energy is the diffusive nature of spacetime.",
+  // },
+];
+
+export default papers;
