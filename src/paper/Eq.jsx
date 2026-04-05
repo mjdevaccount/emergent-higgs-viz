@@ -84,11 +84,16 @@ export default function Eq({ tex, display = false, num }) {
 }
 
 function attachHover(el, term, set, clear, cleanups) {
+  // DEBUG: permanent marker so we can SEE what got tagged
+  el.style.borderBottom = "2px dashed rgba(255,215,0,0.6)";
   el.style.cursor = "pointer";
   el.style.transition = "all 0.15s ease";
   el.style.borderRadius = "3px";
   el.style.padding = "1px 3px";
   el.style.margin = "0 -3px";
+  // Log the first match's position for debugging
+  const rect = el.getBoundingClientRect();
+  console.debug(`[Eq] Tagged "${term}" at`, rect.x.toFixed(0), rect.y.toFixed(0), `${rect.width.toFixed(0)}x${rect.height.toFixed(0)}`, el);
   const enter = () => {
     set(term);
     el.style.textShadow = "0 0 12px #ffd700, 0 0 24px rgba(255,215,0,0.5)";
