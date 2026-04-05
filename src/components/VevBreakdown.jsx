@@ -1,4 +1,5 @@
 import { VEV, vevBreakdown, R_0, R_H, R_A } from "../physics.js";
+import { isVevGlowing } from "../paper/highlight.js";
 
 export default function VevBreakdown({ radialPos, highlight }) {
   const { v, h, f } = vevBreakdown(radialPos);
@@ -6,7 +7,7 @@ export default function VevBreakdown({ radialPos, highlight }) {
   const hFrac = (h * h) / (VEV * VEV);
   const isHiggsDominant = hFrac > 0.5;
   const nearMinimum = f < 0.3;
-  const isGlowing = highlight === "lambda5" || highlight === "r0";
+  const isGlowing = isVevGlowing(highlight);
 
   return (
     <div style={{

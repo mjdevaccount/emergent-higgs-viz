@@ -3,6 +3,7 @@ import {
   R_MIN, R_H, R_T, R_0, R_A,
   potentialPlus, potentialMinus, groundState,
 } from "../physics.js";
+import { TERMS, isRadiusHighlighted } from "../paper/highlight.js";
 
 export default function DualPotentialPlot({ radialPos, width, height, highlight }) {
   const canvasRef = useRef(null);
@@ -71,16 +72,16 @@ export default function DualPotentialPlot({ radialPos, width, height, highlight 
     // Key radii vertical lines
     const radii = [
       { r: R_MIN, label: "r_min", hlKey: "rmin", color: "rgba(180,180,180,0.3)", sublabel: `${R_MIN.toFixed(3)}r₀` },
-      { r: R_H, label: "rₕ", hlKey: "rh", color: "rgba(0,212,255,0.5)", sublabel: `${R_H.toFixed(3)}r₀` },
+      { r: R_H, label: "rₕ", hlKey: TERMS.rh, color: "rgba(0,212,255,0.5)", sublabel: `${R_H.toFixed(3)}r₀` },
       { r: R_T, label: "r_T", hlKey: "rt", color: "rgba(0,255,140,0.4)", sublabel: `${R_T.toFixed(3)}r₀` },
-      { r: R_0, label: "r₀", hlKey: "r0", color: "rgba(255,80,80,0.5)", sublabel: "Schwarzschild" },
-      { r: R_A, label: "rₐ", hlKey: "ra", color: "rgba(255,200,50,0.4)", sublabel: `${R_A.toFixed(2)}r₀` },
+      { r: R_0, label: "r₀", hlKey: TERMS.r0, color: "rgba(255,80,80,0.5)", sublabel: "Schwarzschild" },
+      { r: R_A, label: "rₐ", hlKey: TERMS.ra, color: "rgba(255,200,50,0.4)", sublabel: `${R_A.toFixed(2)}r₀` },
     ];
 
     for (const { r, label, hlKey, color, sublabel } of radii) {
       if (r < rMin || r > rMax) continue;
       const x = toX(r);
-      const isHl = highlight === hlKey || highlight === "r0" && hlKey === "r0";
+      const isHl = isRadiusHighlighted(highlight, hlKey);
       ctx.strokeStyle = isHl ? "#ffd700" : color;
       ctx.lineWidth = isHl ? 3 : 1;
       if (isHl) { ctx.shadowColor = "rgba(255,215,0,0.6)"; ctx.shadowBlur = 12; }

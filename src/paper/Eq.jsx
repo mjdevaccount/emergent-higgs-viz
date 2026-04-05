@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useRef } from "react";
 import katex from "katex";
 import { useHighlight } from "./HighlightContext.jsx";
+import { TERMS } from "./highlight.js";
 
 export default function Eq({ tex, display = false, num }) {
   const ref = useRef(null);
@@ -36,17 +37,17 @@ export default function Eq({ tex, display = false, num }) {
 
       // Match r₀ — a .mord containing .msupsub with text "r0"
       if (text === "r0" && el.querySelector(".msupsub")) {
-        attachHover(el, "r0", set, clear, cleanups);
+        attachHover(el, TERMS.r0, set, clear, cleanups);
       }
 
       // Match r_h — subscript group with text "rh"
       if (text === "rh" && el.querySelector(".msupsub")) {
-        attachHover(el, "rh", set, clear, cleanups);
+        attachHover(el, TERMS.rh, set, clear, cleanups);
       }
 
       // Match r_a — subscript group with text "ra"
       if (text === "ra" && el.querySelector(".msupsub")) {
-        attachHover(el, "ra", set, clear, cleanups);
+        attachHover(el, TERMS.ra, set, clear, cleanups);
       }
 
       // Match fractions that look like 1/5
@@ -54,7 +55,7 @@ export default function Eq({ tex, display = false, num }) {
       if (el.classList.contains("mfrac")) {
         const digits = strip(el.textContent).split("").sort().join("");
         if (digits === "15") {
-          attachHover(el, "lambda5", set, clear, cleanups);
+          attachHover(el, TERMS.lambda5, set, clear, cleanups);
         }
       }
     }
