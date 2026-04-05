@@ -143,4 +143,81 @@ export const styles = {
     color: colors.textFaint,
     marginTop: 2,
   },
+
+  // ── Paper prose section styles ─────────────────────────────────
+  // Used by all paper/ section components (Framework, BlackHole, etc.)
+
+  section: { maxWidth: 740, margin: "0 auto", padding: "24px 32px" },
+
+  heading: { fontSize: 22, fontWeight: 400, marginBottom: 16, color: colors.text },
+
+  prose: {
+    fontSize: 16, fontWeight: 300, lineHeight: 1.8,
+    color: "rgba(200,210,220,0.75)", margin: "16px 0",
+  },
+
+  figureBox: {
+    background: "rgba(8,12,24,0.5)",
+    border: `1px solid ${colors.borderFaint}`,
+    borderRadius: 8, padding: "16px 8px", margin: "24px 0",
+    display: "flex", flexDirection: "column", alignItems: "center",
+  },
+
+  figureCaption: {
+    fontSize: 13, fontStyle: "italic", color: colors.textDim,
+    textAlign: "center", marginTop: 12, lineHeight: 1.6, maxWidth: 500,
+  },
+
+  sliderLabel: {
+    display: "flex", justifyContent: "space-between",
+    fontFamily: fonts.mono, fontSize: 10, color: colors.textCaption,
+  },
+
+  link: { color: colors.cyan, textDecoration: "none" },
+
+  // Table styles for paper sections
+  table: { width: "100%", borderCollapse: "collapse", margin: "20px 0" },
+
+  th: {
+    fontFamily: fonts.mono, fontSize: 11,
+    color: rgba(colors.cyan, 0.5), textAlign: "center",
+    padding: "10px 8px", borderBottom: `1px solid ${rgba(colors.cyan, 0.15)}`,
+  },
+
+  td: {
+    fontSize: 13, textAlign: "center", padding: "10px 8px",
+    borderBottom: `1px solid ${rgba(colors.cyan, 0.05)}`,
+    color: "rgba(200,210,220,0.7)",
+  },
+
+  // Equation block
+  eqNum: {
+    fontFamily: fonts.mono, fontSize: 13,
+    color: colors.textCaption, flexShrink: 0,
+  },
+
+  // Badge styles (Header)
+  badge: {
+    display: "inline-flex", fontSize: 11,
+    fontFamily: fonts.mono, textDecoration: "none",
+    borderRadius: 3, overflow: "hidden",
+  },
+
+  badgeLeft: {
+    padding: "3px 6px",
+    background: "rgba(180,200,220,0.1)",
+    color: "rgba(180,200,220,0.6)",
+  },
+
+  // Floating pill button (PageToggle, SoundScape)
+  pillButton: (active) => ({
+    fontFamily: fonts.mono,
+    fontSize: 10, letterSpacing: 1,
+    padding: "6px 12px",
+    border: `1px solid ${rgba(colors.cyan, 0.2)}`,
+    borderRadius: 12, cursor: "pointer",
+    backdropFilter: "blur(8px)",
+    background: active ? rgba(colors.cyan, 0.1) : "rgba(6,6,16,0.7)",
+    color: active ? colors.cyan : colors.textFaint,
+  }),
 };

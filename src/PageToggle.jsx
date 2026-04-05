@@ -1,3 +1,5 @@
+import { colors, rgba, fonts } from "./theme.js";
+
 export default function PageToggle({ mode, onToggle }) {
   return (
     <div
@@ -11,7 +13,7 @@ export default function PageToggle({ mode, onToggle }) {
         gap: 0,
         borderRadius: 20,
         overflow: "hidden",
-        border: "1px solid rgba(0,212,255,0.2)",
+        border: `1px solid ${rgba(colors.cyan, 0.2)}`,
         backdropFilter: "blur(12px)",
         background: "rgba(6,6,16,0.7)",
       }}
@@ -30,7 +32,7 @@ export default function PageToggle({ mode, onToggle }) {
 }
 
 const base = {
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: fonts.mono,
   fontSize: 11,
   letterSpacing: 1,
   padding: "8px 16px",
@@ -41,12 +43,12 @@ const base = {
 
 const activeBtn = {
   ...base,
-  background: "rgba(0,212,255,0.15)",
-  color: "#00d4ff",
+  background: rgba(colors.cyan, 0.15),
+  color: colors.cyan,
 };
 
 const inactiveBtn = {
   ...base,
   background: "transparent",
-  color: "rgba(180,200,220,0.4)",
+  color: colors.textCaption,
 };

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import katex from "katex";
+import { styles } from "../theme.js";
 
 export default function Eq({ tex, display = false, num }) {
   const html = useMemo(() => {
@@ -18,7 +19,7 @@ export default function Eq({ tex, display = false, num }) {
     return (
       <div style={blockWrap}>
         <span dangerouslySetInnerHTML={{ __html: html }} />
-        {num && <span style={eqNum}>({num})</span>}
+        {num && <span style={styles.eqNum}>({num})</span>}
       </div>
     );
   }
@@ -32,11 +33,4 @@ const blockWrap = {
   gap: 24,
   margin: "20px 0",
   overflowX: "auto",
-};
-
-const eqNum = {
-  fontFamily: "'IBM Plex Mono', monospace",
-  fontSize: 13,
-  color: "rgba(180,200,220,0.4)",
-  flexShrink: 0,
 };

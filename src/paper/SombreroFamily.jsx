@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
 import CouplingPlot from "../components/CouplingPlot.jsx";
+import { colors, styles } from "../theme.js";
 
 export default function SombreroFamily({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);
@@ -15,10 +16,10 @@ export default function SombreroFamily({ radialPos, onChangeR }) {
   }, []);
 
   return (
-    <section style={section} ref={ref}>
-      <h2 style={heading}>3.5. An Entire Family of Sombrero Potentials</h2>
+    <section style={styles.section} ref={ref}>
+      <h2 style={styles.heading}>3.5. An Entire Family of Sombrero Potentials</h2>
 
-      <p style={prose}>
+      <p style={styles.prose}>
         The sombrero potential is not unique — any point in space has its own
         version, parameterized by <Eq tex="Z_\pm(r)" />:
       </p>
@@ -32,7 +33,7 @@ export default function SombreroFamily({ radialPos, onChangeR }) {
         Z_\\pm(r) = 1 + \\frac{r_0^2}{r^2}\\left(\\frac{1}{4} \\pm \\sqrt{\\frac{r^2}{2r_0^2} - \\frac{3}{16}}\\right)
       `} />
 
-      <p style={prose}>
+      <p style={styles.prose}>
         The quartic coupling relative to the SM, <Eq tex="f_\pm(r)" />, defines
         how the sombrero tightens or loosens at each point in space:
       </p>
@@ -43,7 +44,7 @@ export default function SombreroFamily({ radialPos, onChangeR }) {
       `} />
 
       {/* Interactive Figure 3 */}
-      <div style={figureBox}>
+      <div style={styles.figureBox}>
         {width > 0 && (
           <CouplingPlot
             radialPos={radialPos}
@@ -52,7 +53,7 @@ export default function SombreroFamily({ radialPos, onChangeR }) {
           />
         )}
         <Slider value={radialPos} onChange={onChangeR} />
-        <div style={caption}>
+        <div style={styles.figureCaption}>
           <strong>Figure 3.</strong> Quartic coupling
           coefficient <Eq tex="f(r)" /> across <Eq tex="r/r_0" />.
           Drops to <Eq tex="1/5" /> at both potential minima.
@@ -65,9 +66,9 @@ export default function SombreroFamily({ radialPos, onChangeR }) {
 function Slider({ value, onChange }) {
   return (
     <div style={{ maxWidth: 500, margin: "12px auto 0", padding: "0 8px" }}>
-      <div style={sliderLabel}>
+      <div style={styles.sliderLabel}>
         <span>r = r_min</span>
-        <span style={{ color: "#ffd700" }}>r / r₀ = {value.toFixed(3)}</span>
+        <span style={{ color: colors.gold }}>r / r₀ = {value.toFixed(3)}</span>
         <span>r = 4r₀</span>
       </div>
       <input type="range" min={R_MIN + 0.001} max={4.0} step={0.001}
@@ -76,10 +77,3 @@ function Slider({ value, onChange }) {
     </div>
   );
 }
-
-const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px" };
-const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#e0e8f0" };
-const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
-const figureBox = { background: "rgba(8,12,24,0.5)", border: "1px solid rgba(0,212,255,0.08)", borderRadius: 8, padding: "16px 8px", margin: "24px 0", display: "flex", flexDirection: "column", alignItems: "center" };
-const caption = { fontSize: 13, fontStyle: "italic", color: "rgba(180,200,220,0.5)", textAlign: "center", marginTop: 12, lineHeight: 1.6, maxWidth: 500 };
-const sliderLabel = { display: "flex", justifyContent: "space-between", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(180,200,220,0.4)" };

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useHighlight } from "./HighlightContext.jsx";
+import { colors, rgba } from "../theme.js";
 
 /**
  * Wrap any inline content (typically <Eq />) to make it hoverable.
@@ -21,9 +22,9 @@ export default function HoverTerm({ term, children }) {
         position: "relative",
         borderRadius: 3,
         transition: "all 0.15s ease",
-        textShadow: hovered ? "0 0 12px #ffd700, 0 0 24px rgba(255,215,0,0.5)" : "none",
-        background: hovered ? "rgba(255,215,0,0.15)" : "transparent",
-        outline: hovered ? "1px solid rgba(255,215,0,0.4)" : "none",
+        textShadow: hovered ? `0 0 12px ${colors.gold}, 0 0 24px ${rgba(colors.gold, 0.5)}` : "none",
+        background: hovered ? rgba(colors.gold, 0.15) : "transparent",
+        outline: hovered ? `1px solid ${rgba(colors.gold, 0.4)}` : "none",
         outlineOffset: 2,
       }}
     >

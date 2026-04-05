@@ -4,6 +4,7 @@ import Eq from "./Eq.jsx";
 import HoverTerm from "./HoverTerm.jsx";
 import { TERMS } from "./highlight.js";
 import SombreroViz from "../components/SombreroViz.jsx";
+import { colors, styles } from "../theme.js";
 
 export default function BlackHole({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);
@@ -19,10 +20,10 @@ export default function BlackHole({ radialPos, onChangeR }) {
   const somW = Math.min(width - 16, 400);
 
   return (
-    <section style={section} ref={ref}>
-      <h2 style={heading}>3.3–3.4. The Schwarzschild Black Hole & Accretion Disk</h2>
+    <section style={styles.section} ref={ref}>
+      <h2 style={styles.heading}>3.3–3.4. The Schwarzschild Black Hole & Accretion Disk</h2>
 
-      <p style={prose}>
+      <p style={styles.prose}>
         At the minimum of the steep well potential (<HoverTerm term={TERMS.rh}><Eq tex="r_h" /></HoverTerm>), a variable
         transformation <Eq tex="\tilde{z} = \sqrt{3/2} + \sigma_r / r_0" /> yields
         a sombrero hat potential identical to the Standard Model — except the
@@ -34,7 +35,7 @@ export default function BlackHole({ radialPos, onChangeR }) {
         \\left\\{ -\\frac{15}{16}\\tilde{z}^2 + \\frac{1}{16}\\tilde{z}^4 \\right\\}
       `} />
 
-      <p style={prose}>
+      <p style={styles.prose}>
         Promoting back to EW isospin algebra in the unitarity gauge:
       </p>
 
@@ -43,7 +44,7 @@ export default function BlackHole({ radialPos, onChangeR }) {
         + \\frac{\\lambda}{5} (\\Phi^\\dagger_s \\Phi_s)^2
       `} />
 
-      <p style={prose}>
+      <p style={styles.prose}>
         The SM Higgs field corresponds to the radial Planck field in the
         spontaneously broken EW space: <Eq tex="h_s \equiv v \frac{2}{\sqrt{3}} \frac{\sigma_r}{r_0}" />.
         The Higgs is the bridge connecting the weak sector to the geometry.
@@ -52,12 +53,12 @@ export default function BlackHole({ radialPos, onChangeR }) {
       </p>
 
       {/* Interactive sombrero */}
-      <div style={figureBox}>
+      <div style={styles.figureBox}>
         {somW > 0 && (
           <SombreroViz radialPos={radialPos} width={somW} height={320} />
         )}
         <Slider value={radialPos} onChange={onChangeR} />
-        <div style={caption}>
+        <div style={styles.figureCaption}>
           <strong>Sombrero potential</strong> — shape warps with radial position.
           At <HoverTerm term={TERMS.rh}><Eq tex="r_h" /></HoverTerm> the bowl is wide and shallow (<HoverTerm term={TERMS.lambda5}><Eq tex="\lambda/5" /></HoverTerm>).
         </div>
@@ -69,9 +70,9 @@ export default function BlackHole({ radialPos, onChangeR }) {
 function Slider({ value, onChange }) {
   return (
     <div style={{ maxWidth: 400, margin: "12px auto 0", padding: "0 8px" }}>
-      <div style={sliderLabel}>
+      <div style={styles.sliderLabel}>
         <span>r = r_h</span>
-        <span style={{ color: "#ffd700" }}>r / r₀ = {value.toFixed(3)}</span>
+        <span style={{ color: colors.gold }}>r / r₀ = {value.toFixed(3)}</span>
         <span>r = 4r₀</span>
       </div>
       <input type="range" min={R_MIN + 0.001} max={4.0} step={0.001}
@@ -80,10 +81,3 @@ function Slider({ value, onChange }) {
     </div>
   );
 }
-
-const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px" };
-const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#e0e8f0" };
-const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
-const figureBox = { background: "rgba(8,12,24,0.5)", border: "1px solid rgba(0,212,255,0.08)", borderRadius: 8, padding: "16px 8px", margin: "24px 0", display: "flex", flexDirection: "column", alignItems: "center" };
-const caption = { fontSize: 13, fontStyle: "italic", color: "rgba(180,200,220,0.5)", textAlign: "center", marginTop: 12, lineHeight: 1.6, maxWidth: 500 };
-const sliderLabel = { display: "flex", justifyContent: "space-between", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(180,200,220,0.4)" };

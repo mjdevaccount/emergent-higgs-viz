@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from "react";
 import { R_0 } from "../physics.js";
+import { colors, rgba, fonts, styles as themeStyles } from "../theme.js";
 
 // Low-frequency drone that deepens as you descend toward the core.
 // Muted by default — user must click to enable.
@@ -73,20 +74,11 @@ export default function SoundScape({ radialPos, enabled }) {
         // Parent handles the toggle via its own state
       }}
       style={{
+        ...themeStyles.pillButton(enabled),
         position: "fixed",
         bottom: 16,
         right: 16,
         zIndex: 1000,
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: 10,
-        letterSpacing: 1,
-        padding: "6px 12px",
-        border: "1px solid rgba(0,212,255,0.2)",
-        borderRadius: 12,
-        background: enabled ? "rgba(0,212,255,0.1)" : "rgba(6,6,16,0.7)",
-        color: enabled ? "#00d4ff" : "rgba(180,200,220,0.3)",
-        cursor: "pointer",
-        backdropFilter: "blur(8px)",
         display: "none", // Hidden — parent controls visibility
       }}
     >

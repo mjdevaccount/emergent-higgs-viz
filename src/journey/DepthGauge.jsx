@@ -1,11 +1,12 @@
 import { R_H, R_T, R_0, R_A, R_MIN } from "../physics.js";
+import { colors, rgba, fonts } from "../theme.js";
 
 const TICKS = [
-  { r: 4.0, label: "the cosmos", color: "rgba(180,200,220,0.3)" },
-  { r: R_A, label: "accretion disk", color: "rgba(255,200,50,0.5)" },
+  { r: 4.0, label: "the cosmos", color: colors.textFaint },
+  { r: R_A, label: "accretion disk", color: rgba(colors.gold, 0.5) },
   { r: R_0, label: "event horizon", color: "rgba(255,80,80,0.6)" },
-  { r: R_T, label: "symmetry breaks", color: "rgba(0,255,140,0.5)" },
-  { r: R_H, label: "the core", color: "rgba(255,215,0,0.7)" },
+  { r: R_T, label: "symmetry breaks", color: rgba(colors.green, 0.5) },
+  { r: R_H, label: "the core", color: rgba(colors.gold, 0.7) },
 ];
 
 const R_TOP = 4.0;
@@ -37,8 +38,8 @@ export default function DepthGauge({ radialPos }) {
           width: 10,
           height: 10,
           borderRadius: "50%",
-          background: radialPos <= R_0 ? "#ffd700" : "#00d4ff",
-          boxShadow: `0 0 12px ${radialPos <= R_0 ? "rgba(255,215,0,0.6)" : "rgba(0,212,255,0.6)"}`,
+          background: radialPos <= R_0 ? colors.gold : colors.cyan,
+          boxShadow: `0 0 12px ${radialPos <= R_0 ? rgba(colors.gold, 0.6) : rgba(colors.cyan, 0.6)}`,
           transition: "top 0.1s ease, background 0.3s ease",
         }}
       />
@@ -80,7 +81,7 @@ const tickLine = {
 };
 
 const tickLabel = {
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: fonts.mono,
   fontSize: 9,
   letterSpacing: 1,
   marginRight: 10,

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
 import EntropyMap from "../components/EntropyMap.jsx";
+import { colors, rgba, fonts, styles } from "../theme.js";
 
 export default function Entropy({ radialPos, onChangeR }) {
   const [width, setWidth] = useState(0);
@@ -15,10 +16,10 @@ export default function Entropy({ radialPos, onChangeR }) {
   }, []);
 
   return (
-    <section style={section} ref={ref}>
-      <h2 style={heading}>4. Higgs Vacuum Entropy</h2>
+    <section style={styles.section} ref={ref}>
+      <h2 style={styles.heading}>4. Higgs Vacuum Entropy</h2>
 
-      <p style={prose}>
+      <p style={styles.prose}>
         Treating the Higgs vacuum as an over-damped system in equilibrium, the
         Smoluchowski equation yields a Langevin equation for the vacuum density.
         Two dimensionless parameters govern its evolution:
@@ -34,14 +35,14 @@ export default function Entropy({ radialPos, onChangeR }) {
         \\left\\{ 6 - \\frac{1}{r^2} \\mp 4\\sqrt{\\frac{r^2}{2r_0^2} - \\frac{3}{16}} \\right\\}
       `} />
 
-      <p style={prose}>
+      <p style={styles.prose}>
         The entropy <Eq tex="S \propto -\alpha_1" /> (Eq. 114). The ground
         state <Eq tex="\alpha_1^-" /> changes sign
         at <Eq tex="r^2 = \tfrac{1}{2}r_0^2" />, giving positive entropy inside
         the Schwarzschild sphere and negative entropy in the accretion region.
       </p>
 
-      <div style={figureBox}>
+      <div style={styles.figureBox}>
         {width > 0 && (
           <EntropyMap
             radialPos={radialPos}
@@ -50,7 +51,7 @@ export default function Entropy({ radialPos, onChangeR }) {
           />
         )}
         <Slider value={radialPos} onChange={onChangeR} />
-        <div style={caption}>
+        <div style={styles.figureCaption}>
           <strong>Figure 6.</strong> Parameters <Eq tex="\alpha_1^-" /> (solid
           cyan) and <Eq tex="\alpha_2^+" /> (dashed orange) plotted
           across <Eq tex="r/r_0" />. Green region: positive entropy.
@@ -58,7 +59,7 @@ export default function Entropy({ radialPos, onChangeR }) {
         </div>
       </div>
 
-      <p style={prose}>
+      <p style={styles.prose}>
         The vacuum density, Green's function, and entropy follow from the
         partition function (Eq. 107–111). For high-energy Higgs fields
         inside the Schwarzschild sphere:
@@ -69,39 +70,39 @@ export default function Entropy({ radialPos, onChangeR }) {
         <table style={table}>
           <thead>
             <tr>
-              <th style={th}></th>
-              <th style={th}><Eq tex="\langle q^n \rangle" /></th>
-              <th style={th}><Eq tex="p_k" /></th>
-              <th style={th}><Eq tex="G_{pp}" /></th>
-              <th style={th}><Eq tex="S_k" /></th>
+              <th style={styles.th}></th>
+              <th style={styles.th}><Eq tex="\langle q^n \rangle" /></th>
+              <th style={styles.th}><Eq tex="p_k" /></th>
+              <th style={styles.th}><Eq tex="G_{pp}" /></th>
+              <th style={styles.th}><Eq tex="S_k" /></th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td style={tdLabel}>b ≫ a</td>
-              <td style={td}><Eq tex="b^n" /></td>
-              <td style={td}><Eq tex="e^b" /></td>
-              <td style={td}>0</td>
-              <td style={td}><Eq tex="-b\,e^b" /></td>
+              <td style={styles.td}><Eq tex="b^n" /></td>
+              <td style={styles.td}><Eq tex="e^b" /></td>
+              <td style={styles.td}>0</td>
+              <td style={styles.td}><Eq tex="-b\,e^b" /></td>
             </tr>
             <tr>
               <td style={tdLabel}>a ≫ b</td>
-              <td style={td}><Eq tex="(2a)^{n/2}" /> (even n)</td>
-              <td style={td}><Eq tex="e^a" /></td>
-              <td style={td}><Eq tex="e^{2a}(e^{2a}-1)" /></td>
-              <td style={td}><Eq tex="-2a\,e^a" /></td>
+              <td style={styles.td}><Eq tex="(2a)^{n/2}" /> (even n)</td>
+              <td style={styles.td}><Eq tex="e^a" /></td>
+              <td style={styles.td}><Eq tex="e^{2a}(e^{2a}-1)" /></td>
+              <td style={styles.td}><Eq tex="-2a\,e^a" /></td>
             </tr>
             <tr>
               <td style={tdLabel}>High-energy</td>
-              <td style={td}>—</td>
-              <td style={td}><Eq tex="1 + b" /></td>
-              <td style={td}><Eq tex="2a" /></td>
-              <td style={td}><Eq tex="-b" /></td>
+              <td style={styles.td}>—</td>
+              <td style={styles.td}><Eq tex="1 + b" /></td>
+              <td style={styles.td}><Eq tex="2a" /></td>
+              <td style={styles.td}><Eq tex="-b" /></td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div style={caption}>
+      <div style={styles.figureCaption}>
         <strong>Table 1.</strong> Higgs vacuum density and entropy for the two
         vacuum states, where <Eq tex="a" /> and <Eq tex="b" /> are dimensionless
         parameters from the partition function (Eq. 105–106).
@@ -113,9 +114,9 @@ export default function Entropy({ radialPos, onChangeR }) {
 function Slider({ value, onChange }) {
   return (
     <div style={{ maxWidth: 500, margin: "12px auto 0", padding: "0 8px" }}>
-      <div style={sliderLabel}>
+      <div style={styles.sliderLabel}>
         <span>r = r_min</span>
-        <span style={{ color: "#ffd700" }}>r / r₀ = {value.toFixed(3)}</span>
+        <span style={{ color: colors.gold }}>r / r₀ = {value.toFixed(3)}</span>
         <span>r = 4r₀</span>
       </div>
       <input type="range" min={R_MIN + 0.001} max={4.0} step={0.001}
@@ -125,13 +126,5 @@ function Slider({ value, onChange }) {
   );
 }
 
-const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px" };
-const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#e0e8f0" };
-const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
-const figureBox = { background: "rgba(8,12,24,0.5)", border: "1px solid rgba(0,212,255,0.08)", borderRadius: 8, padding: "16px 8px", margin: "24px 0", display: "flex", flexDirection: "column", alignItems: "center" };
-const caption = { fontSize: 13, fontStyle: "italic", color: "rgba(180,200,220,0.5)", textAlign: "center", marginTop: 12, lineHeight: 1.6, maxWidth: 500 };
-const sliderLabel = { display: "flex", justifyContent: "space-between", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(180,200,220,0.4)" };
 const table = { width: "100%", borderCollapse: "collapse", margin: "0 auto", maxWidth: 600 };
-const th = { fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "rgba(0,212,255,0.5)", textAlign: "center", padding: "10px 8px", borderBottom: "1px solid rgba(0,212,255,0.15)" };
-const td = { fontSize: 13, textAlign: "center", padding: "10px 8px", borderBottom: "1px solid rgba(0,212,255,0.05)", color: "rgba(200,210,220,0.7)" };
-const tdLabel = { ...td, textAlign: "left", fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "rgba(0,212,255,0.6)" };
+const tdLabel = { ...styles.td, textAlign: "left", fontFamily: fonts.mono, fontSize: 11, color: rgba(colors.cyan, 0.6) };

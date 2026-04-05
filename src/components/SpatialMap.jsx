@@ -1,5 +1,7 @@
 import { useRef, useEffect } from "react";
 import { R_MIN, R_H, R_T, R_0, R_A, sombreroHeight } from "../physics.js";
+import { colors, rgba, canvas as canvasFonts } from "../theme.js";
+import { setupCanvas } from "../canvas-utils.js";
 
 // Top-down radial map: concentric rings at key radii with tiny
 // sombrero profiles drawn at each. "The whole paper in one image."
@@ -7,14 +9,9 @@ export default function SpatialMap({ width, height }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, width, height);
+    const result = setupCanvas(canvasRef, width, height);
+    if (!result) return;
+    const { ctx } = result;
 
     const cx = width / 2;
     const cy = height / 2;
@@ -53,10 +50,10 @@ export default function SpatialMap({ width, height }) {
     // ── Concentric rings at key radii ──
     const rings = [
       { r: R_MIN, label: "r_min", color: "rgba(180,180,180,0.2)", dash: [2, 4] },
-      { r: R_H, label: "rₕ  deep well", color: "rgba(0,212,255,0.4)", dash: [] },
-      { r: R_T, label: "r_T  transition", color: "rgba(0,255,140,0.3)", dash: [4, 4] },
+      { r: R_H, label: "rₕ  deep well", color: rgba(colors.cyan, 0.4), dash: [] },
+      { r: R_T, label: "r_T  transition", color: rgba(colors.green, 0.3), dash: [4, 4] },
       { r: R_0, label: "r₀  event horizon", color: "rgba(255,80,80,0.5)", dash: [] },
-      { r: R_A, label: "rₐ  accretion disk", color: "rgba(255,200,50,0.4)", dash: [] },
+      { r: R_A, label: "rₐ  accretion disk", color: rgba(colors.gold, 0.4), dash: [] },
     ];
 
     for (const { r, label, color, dash } of rings) {
@@ -71,16 +68,16 @@ export default function SpatialMap({ width, height }) {
 
       // Label
       ctx.fillStyle = color;
-      ctx.font = "10px 'IBM Plex Mono', monospace";
+      ctx.font = canvasFonts.mono10;
       ctx.textAlign = "left";
       ctx.fillText(label, cx + pr * Math.cos(-0.3) + 6, cy + pr * Math.sin(-0.3) - 4);
     }
 
     // ── Mini sombrero profiles at key radii ──
     const sombreroRadii = [
-      { r: R_H, color: "#00d4ff", labelY: -1 },
+      { r: R_H, color: colors.cyan, labelY: -1 },
       { r: R_0, color: "#ff6666", labelY: -1 },
-      { r: R_A, color: "#ffd700", labelY: 1 },
+      { r: R_A, color: colors.gold, labelY: 1 },
     ];
 
     for (const { r, color } of sombreroRadii) {
@@ -92,23 +89,23 @@ export default function SpatialMap({ width, height }) {
     }
 
     // ── Center label ──
-    ctx.fillStyle = "rgba(0,212,255,0.6)";
-    ctx.font = "italic 13px 'Cormorant Garamond', Georgia, serif";
+    ctx.fillStyle = rgba(colors.cyan, 0.6);
+    ctx.font = canvasFonts.serifTitle;
     ctx.textAlign = "center";
     ctx.fillText("singularity", cx, cy + 4);
 
     // ── Title ──
-    ctx.fillStyle = "rgba(180,200,220,0.5)";
-    ctx.font = "11px 'IBM Plex Mono', monospace";
+    ctx.fillStyle = colors.textDim;
+    ctx.font = canvasFonts.mono11;
     ctx.textAlign = "center";
     ctx.fillText("EW POTENTIAL MAPPED IN PHYSICAL SPACE", cx, 18);
 
     // ── λ/5 annotations ──
-    ctx.font = "italic 11px 'Cormorant Garamond', Georgia, serif";
-    ctx.fillStyle = "rgba(0,212,255,0.7)";
+    ctx.font = canvasFonts.serifLabelLg;
+    ctx.fillStyle = rgba(colors.cyan, 0.7);
     const rhPx = rToPixel(R_H);
     ctx.fillText("λ/5", cx - rhPx - 8, cy + 14);
-    ctx.fillStyle = "rgba(255,215,0,0.7)";
+    ctx.fillStyle = rgba(colors.gold, 0.7);
     const raPx = rToPixel(R_A);
     ctx.fillText("λ/5", cx + raPx + 8, cy + 14);
 

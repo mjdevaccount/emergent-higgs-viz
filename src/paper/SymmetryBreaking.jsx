@@ -5,6 +5,7 @@ import HoverTerm from "./HoverTerm.jsx";
 import { useHighlight } from "./HighlightContext.jsx";
 import { TERMS } from "./highlight.js";
 import DualPotentialPlot from "../components/DualPotential.jsx";
+import { colors, styles } from "../theme.js";
 
 export default function SymmetryBreaking({ radialPos, onChangeR }) {
   const { active } = useHighlight();
@@ -19,10 +20,10 @@ export default function SymmetryBreaking({ radialPos, onChangeR }) {
   }, []);
 
   return (
-    <section style={section} ref={ref}>
-      <h2 style={heading}>3. Emergent Higgs and the Schwarzschild Black Hole</h2>
+    <section style={styles.section} ref={ref}>
+      <h2 style={styles.heading}>3. Emergent Higgs and the Schwarzschild Black Hole</h2>
 
-      <p style={prose}>
+      <p style={styles.prose}>
         A real scalar field <Eq tex="\phi" /> placed in stochastic spacetime
         with a zero VEV acquires a nonzero expectation value upon transition to
         spherical coordinates. Minimizing the expected potential in the radial
@@ -37,7 +38,7 @@ export default function SymmetryBreaking({ radialPos, onChangeR }) {
         \\right\\}
       `} />
 
-      <p style={prose}>
+      <p style={styles.prose}>
         The ground state follows <Eq tex="U^-" /> inside{" "}
         <HoverTerm term={TERMS.r0}><Eq tex="r_0" /></HoverTerm> (deep
         well at <HoverTerm term={TERMS.rh}><Eq tex="r_h \approx 0.65\,r_0" /></HoverTerm>) and <Eq tex="U^+" /> outside
@@ -46,7 +47,7 @@ export default function SymmetryBreaking({ radialPos, onChangeR }) {
       </p>
 
       {/* Interactive Figure 2 */}
-      <div style={figureBox}>
+      <div style={styles.figureBox}>
         {width > 0 && (
           <DualPotentialPlot
             radialPos={radialPos}
@@ -56,7 +57,7 @@ export default function SymmetryBreaking({ radialPos, onChangeR }) {
           />
         )}
         <Slider value={radialPos} onChange={onChangeR} />
-        <div style={caption}>
+        <div style={styles.figureCaption}>
           <strong>Figure 2.</strong> Potential post-transition corresponding to
           the ground and excited state with minimums
           at <Eq tex="r = \sqrt{5 \pm \sqrt{21}}\,r_0" />.
@@ -69,9 +70,9 @@ export default function SymmetryBreaking({ radialPos, onChangeR }) {
 function Slider({ value, onChange }) {
   return (
     <div style={{ maxWidth: 500, margin: "12px auto 0", padding: "0 8px" }}>
-      <div style={sliderLabel}>
+      <div style={styles.sliderLabel}>
         <span>r = r_min</span>
-        <span style={{ color: "#ffd700" }}>r / r₀ = {value.toFixed(3)}</span>
+        <span style={{ color: colors.gold }}>r / r₀ = {value.toFixed(3)}</span>
         <span>r = 4r₀</span>
       </div>
       <input
@@ -87,10 +88,4 @@ function Slider({ value, onChange }) {
   );
 }
 
-const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px" };
-const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#e0e8f0" };
-const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
-const figureBox = { background: "rgba(8,12,24,0.5)", border: "1px solid rgba(0,212,255,0.08)", borderRadius: 8, padding: "16px 8px", margin: "24px 0", display: "flex", flexDirection: "column", alignItems: "center" };
-const caption = { fontSize: 13, fontStyle: "italic", color: "rgba(180,200,220,0.5)", textAlign: "center", marginTop: 12, lineHeight: 1.6, maxWidth: 500 };
-const sliderLabel = { display: "flex", justifyContent: "space-between", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(180,200,220,0.4)" };
 const sliderInput = { width: "100%", cursor: "pointer", marginTop: 4 };

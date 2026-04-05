@@ -1,4 +1,5 @@
 import { VEV, vevBreakdown } from "../physics.js";
+import { colors, fonts } from "../theme.js";
 
 // Thin horizontal bar: cyan (vacuum) left, gold (Higgs) right.
 // Tips past 50% inside the horizon. Dead simple.
@@ -8,12 +9,12 @@ export default function VevBar({ radialPos }) {
 
   return (
     <div style={container}>
-      <span style={{ ...endLabel, color: "#00d4ff" }}>vacuum field</span>
+      <span style={{ ...endLabel, color: colors.cyan }}>vacuum field</span>
       <div style={barOuter}>
         <div style={{ ...barFill, width: `${vPct}%`, background: cyanGrad }} />
         <div style={{ ...barFill, width: `${100 - vPct}%`, background: goldGrad }} />
       </div>
-      <span style={{ ...endLabel, color: "#ffd700", textAlign: "right" }}>Higgs field</span>
+      <span style={{ ...endLabel, color: colors.gold, textAlign: "right" }}>Higgs field</span>
     </div>
   );
 }
@@ -31,7 +32,7 @@ const container = {
 };
 
 const endLabel = {
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: fonts.mono,
   fontSize: 8,
   letterSpacing: 1,
   textTransform: "uppercase",
@@ -53,5 +54,5 @@ const barFill = {
   transition: "width 0.3s ease",
 };
 
-const cyanGrad = "linear-gradient(90deg, #006688, #00d4ff)";
-const goldGrad = "linear-gradient(90deg, #ffd700, #886600)";
+const cyanGrad = `linear-gradient(90deg, #006688, ${colors.cyan})`;
+const goldGrad = `linear-gradient(90deg, ${colors.gold}, #886600)`;

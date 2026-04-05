@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { R_MIN, R_H, R_T, R_0, R_A } from "../physics.js";
+import { colors, rgba, fonts, styles as themeStyles } from "../theme.js";
 import BlackHoleScene from "./BlackHoleScene.jsx";
 import DepthGauge from "./DepthGauge.jsx";
 import VevBar from "./VevBar.jsx";
@@ -91,8 +92,8 @@ export default function JourneyShell() {
         overflowY: "auto",
         overflowX: "hidden",
         background: "#020208",
-        color: "#e0e8f0",
-        fontFamily: "'Cormorant Garamond', Georgia, serif",
+        color: colors.text,
+        fontFamily: fonts.serif,
       }}
     >
       <link
@@ -253,15 +254,15 @@ const punchlineText = {
   fontSize: 52,
   fontWeight: 300,
   letterSpacing: 1,
-  color: "#ffd700",
-  textShadow: "0 0 60px rgba(255,215,0,0.4)",
+  color: colors.gold,
+  textShadow: `0 0 60px ${rgba(colors.gold, 0.4)}`,
   margin: 0,
 };
 
 const punchlineSub = {
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: fonts.mono,
   fontSize: 12,
-  color: "rgba(255,215,0,0.4)",
+  color: rgba(colors.gold, 0.4),
   marginTop: 16,
   letterSpacing: 2,
 };
@@ -279,15 +280,15 @@ const escapeGlow = {
   width: 12,
   height: 12,
   borderRadius: "50%",
-  background: "#ffd700",
-  boxShadow: "0 0 20px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.3)",
+  background: colors.gold,
+  boxShadow: `0 0 20px ${rgba(colors.gold, 0.8)}, 0 0 60px ${rgba(colors.gold, 0.3)}`,
   margin: "0 auto 16px",
 };
 
 const escapeText = {
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: fonts.mono,
   fontSize: 12,
-  color: "rgba(255,215,0,0.5)",
+  color: rgba(colors.gold, 0.5),
   letterSpacing: 2,
 };
 
@@ -296,9 +297,9 @@ const scrollHint = {
   bottom: 50,
   left: "50%",
   transform: "translateX(-50%)",
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: fonts.mono,
   fontSize: 10,
-  color: "rgba(180,200,220,0.3)",
+  color: colors.textFaint,
   letterSpacing: 2,
   textTransform: "uppercase",
   animation: "pulse 2s ease-in-out infinite",
@@ -310,14 +311,5 @@ const soundBtn = (on) => ({
   bottom: 40,
   right: 16,
   zIndex: 1000,
-  fontFamily: "'IBM Plex Mono', monospace",
-  fontSize: 10,
-  letterSpacing: 1,
-  padding: "6px 12px",
-  border: "1px solid rgba(0,212,255,0.2)",
-  borderRadius: 12,
-  background: on ? "rgba(0,212,255,0.1)" : "rgba(6,6,16,0.7)",
-  color: on ? "#00d4ff" : "rgba(180,200,220,0.3)",
-  cursor: "pointer",
-  backdropFilter: "blur(8px)",
+  ...themeStyles.pillButton(on),
 });
