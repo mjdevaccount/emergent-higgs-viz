@@ -6,6 +6,7 @@ export default function PageToggle({ mode, onToggle }) {
         top: 16,
         right: 16,
         zIndex: 1000,
+        pointerEvents: "auto",
         display: "flex",
         gap: 0,
         borderRadius: 20,

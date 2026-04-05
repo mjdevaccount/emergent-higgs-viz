@@ -53,7 +53,7 @@ export default function References() {
   );
 }
 
-const section = { maxWidth: 740, margin: "0 auto", padding: "40px 32px 60px", borderTop: "1px solid rgba(0,212,255,0.08)" };
+const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px 48px", borderTop: "1px solid rgba(0,212,255,0.08)" };
 const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#e0e8f0" };
 const prose = { fontSize: 15, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.65)", margin: "16px 0" };
 const link = { color: "#00d4ff", textDecoration: "none" };

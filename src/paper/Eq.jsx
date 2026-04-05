@@ -14,7 +14,8 @@ export default function Eq({ tex, display = false, num }) {
       return katex.renderToString(tex, {
         displayMode: display,
         throwOnError: false,
-        trust: true, // required for \htmlClass
+        trust: true,
+        strict: false, // allow \htmlClass and HTML extensions
       });
     } catch {
       return tex;

@@ -53,7 +53,7 @@ export default function Framework() {
   );
 }
 
-const section = { maxWidth: 740, margin: "0 auto", padding: "40px 32px" };
+const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px" };
 const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#e0e8f0" };
 const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
 const table = { width: "100%", borderCollapse: "collapse", margin: "20px 0" };

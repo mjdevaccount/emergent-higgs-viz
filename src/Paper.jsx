@@ -65,14 +65,14 @@ export default function Paper() {
       </div>
 
       <Header />
-      <div id="framework"><Framework /></div>
-      <div id="symmetry"><SymmetryBreaking radialPos={r} onChangeR={setR} /></div>
-      <div id="blackhole"><BlackHole radialPos={r} onChangeR={setR} /></div>
-      <div id="sombrero"><SombreroFamily radialPos={r} onChangeR={setR} /></div>
-      <div id="spatial"><SpatialMapSection /></div>
-      <div id="transition"><Transition /></div>
-      <div id="vev"><VevConservation radialPos={r} onChangeR={setR} /></div>
-      <div id="entropy"><Entropy radialPos={r} onChangeR={setR} /></div>
+      <div id="framework" style={anchor}><Framework /></div>
+      <div id="symmetry" style={anchor}><SymmetryBreaking radialPos={r} onChangeR={setR} /></div>
+      <div id="blackhole" style={anchor}><BlackHole radialPos={r} onChangeR={setR} /></div>
+      <div id="sombrero" style={anchor}><SombreroFamily radialPos={r} onChangeR={setR} /></div>
+      <div id="spatial" style={anchor}><SpatialMapSection /></div>
+      <div id="transition" style={anchor}><Transition /></div>
+      <div id="vev" style={anchor}><VevConservation radialPos={r} onChangeR={setR} /></div>
+      <div id="entropy" style={anchor}><Entropy radialPos={r} onChangeR={setR} /></div>
       <References />
     </div>
     </HighlightProvider>
@@ -134,4 +134,8 @@ const tocLink = {
   padding: "2px 6px",
   borderRadius: 3,
   transition: "color 0.2s",
+};
+
+const anchor = {
+  scrollMarginTop: 60, // clear the sticky nav bar
 };

@@ -78,7 +78,7 @@ function Slider({ value, onChange }) {
   );
 }
 
-const section = { maxWidth: 740, margin: "0 auto", padding: "40px 32px", borderTop: "1px solid rgba(255,215,0,0.1)" };
+const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px", borderTop: "1px solid rgba(255,215,0,0.1)" };
 const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#ffd700" };
 const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
 const figureBox = { background: "rgba(8,12,24,0.5)", border: "1px solid rgba(0,212,255,0.08)", borderRadius: 8, padding: "24px 16px", margin: "24px 0" };
