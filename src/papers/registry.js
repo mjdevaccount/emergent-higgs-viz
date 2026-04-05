@@ -6,9 +6,16 @@
 // Papers are displayed in chronological order.
 
 import higgs2026 from "./2026-higgs/meta.js";
+import symmetry2024 from "./2024-symmetry/meta.js";
 import universe2024 from "./2024-universe/meta.js";
 
 const papers = [
+  {
+    ...symmetry2024,
+    load: () => import("./2024-symmetry/index.jsx"),
+    color: "#00ff8c",
+    tagline: "Spacetime carries a fundamental uncertainty at Planck scale.",
+  },
   {
     ...universe2024,
     load: () => import("./2024-universe/index.jsx"),
@@ -22,15 +29,6 @@ const papers = [
     color: "#ffd700",
     tagline: "Mass is born inside the black hole.",
   },
-  // {
-  //   id: "2024-symmetry",
-  //   year: 2024,
-  //   shortTitle: "Stochastic Spacetime",
-  //   ...symmetry2024,
-  //   load: () => import("./2024-symmetry/index.jsx"),
-  //   color: "#00ff8c",
-  //   tagline: "Spacetime carries a fundamental uncertainty at Planck scale.",
-  // },
   // {
   //   id: "2023-hubble",
   //   year: 2023,
