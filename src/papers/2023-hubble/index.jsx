@@ -7,6 +7,7 @@ import Problem from "./sections/Problem.jsx";
 import Diffusion from "./sections/Diffusion.jsx";
 import StateParam from "./sections/StateParam.jsx";
 import Redshift from "./sections/Redshift.jsx";
+import References from "./sections/References.jsx";
 
 const TOC = [
   { id: "problem", label: "Tension" },
@@ -25,6 +26,7 @@ export default function Hubble2023({ onBack }) {
         <div id="diffusion" style={anchor}><Diffusion param={f} onChangeParam={setF} /></div>
         <div id="eos" style={anchor}><StateParam param={f} onChangeParam={setF} /></div>
         <div id="redshift" style={anchor}><Redshift /></div>
+        <References />
       </PaperShell>
     </HighlightProvider>
   );

@@ -9,6 +9,7 @@ import ClassicalRegime from "./sections/ClassicalRegime.jsx";
 import Algebra from "./sections/Algebra.jsx";
 import RotationCurves from "./sections/RotationCurves.jsx";
 import VelocityAnalysis from "./sections/VelocityAnalysis.jsx";
+import References from "./sections/References.jsx";
 
 const TOC = [
   { id: "spacetime", label: "ML Spacetime" },
@@ -31,6 +32,7 @@ export default function Symmetry2024({ onBack }) {
         <div id="algebra" style={anchor}><Algebra /></div>
         <div id="rotation" style={anchor}><RotationCurves param={R} onChangeParam={setR} /></div>
         <div id="velocity" style={anchor}><VelocityAnalysis /></div>
+        <References />
       </HighlightProvider>
     </PaperShell>
   );

@@ -10,6 +10,7 @@ import Curvature from "./sections/Curvature.jsx";
 import Acceleration from "./sections/Acceleration.jsx";
 import Species from "./sections/Species.jsx";
 import PlanckFields from "./sections/PlanckFields.jsx";
+import References from "./sections/References.jsx";
 
 const TOC = [
   { id: "framework", label: "Framework" },
@@ -34,6 +35,7 @@ export default function Universe2024({ onBack }) {
         <div id="acceleration" style={anchor}><Acceleration param={X} onChangeParam={setX} /></div>
         <div id="species" style={anchor}><Species param={X} onChangeParam={setX} /></div>
         <div id="planck" style={anchor}><PlanckFields /></div>
+        <References />
       </PaperShell>
     </HighlightProvider>
   );
