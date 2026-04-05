@@ -2,16 +2,6 @@ import { useMemo, useEffect, useRef } from "react";
 import katex from "katex";
 import { useHighlight } from "./HighlightContext.jsx";
 
-// Hoverable term definitions: text content → highlight key.
-// After KaTeX renders, we scan the DOM for these text patterns
-// and attach hover handlers to the enclosing mrow/msub element.
-const HOVER_TERMS = {
-  "r0": ["r", "0"],        // r₀ renders as "r" + subscript "0"
-  "rh": ["r", "h"],        // rₕ
-  "ra": ["r", "a"],        // rₐ
-  "lambda5": ["1", "5"],   // 1/5 renders as "1" over "5" in a frac
-};
-
 export default function Eq({ tex, display = false, num }) {
   const ref = useRef(null);
   const { set, clear } = useHighlight();
@@ -28,28 +18,42 @@ export default function Eq({ tex, display = false, num }) {
     }
   }, [tex, display]);
 
-  // Post-render: scan for hoverable terms by text content
+  // Post-render: scan for hoverable terms by text content.
+  // KaTeX inserts zero-width spaces (U+200B) in vlist structures,
+  // so we must strip them before comparing text content.
   useEffect(() => {
     if (!ref.current) return;
     const cleanups = [];
+    const strip = (s) => s.replace(/[\s\u200B]/g, "");
 
-    // Find all msubsup and mfrac elements
-    const allSpans = ref.current.querySelectorAll(".katex-html .mord, .katex-html .mfrac, .katex-html .msub");
+    // Find all relevant KaTeX spans
+    const allSpans = ref.current.querySelectorAll(
+      ".katex-html .mord, .katex-html .mfrac"
+    );
 
     for (const el of allSpans) {
-      const text = el.textContent.trim();
+      const text = strip(el.textContent);
 
-      // Match r₀ (rendered as "r0" in a subscript group)
-      if (text === "r0" && el.classList.contains("msub") ||
-          (el.querySelector(".msupsub") && el.textContent.replace(/\s/g, "") === "r0")) {
+      // Match r₀ — a .mord containing .msupsub with text "r0"
+      if (text === "r0" && el.querySelector(".msupsub")) {
         attachHover(el, "r0", set, clear, cleanups);
       }
 
-      // Match standalone fractions that look like 1/5
+      // Match r_h — subscript group with text "rh"
+      if (text === "rh" && el.querySelector(".msupsub")) {
+        attachHover(el, "rh", set, clear, cleanups);
+      }
+
+      // Match r_a — subscript group with text "ra"
+      if (text === "ra" && el.querySelector(".msupsub")) {
+        attachHover(el, "ra", set, clear, cleanups);
+      }
+
+      // Match fractions that look like 1/5
       if (el.classList.contains("mfrac")) {
         const nums = el.querySelectorAll(".mord");
         if (nums.length >= 2) {
-          const numText = Array.from(nums).map(n => n.textContent.trim());
+          const numText = Array.from(nums).map(n => strip(n.textContent));
           if (numText.includes("1") && numText.includes("5") && numText.length <= 3) {
             attachHover(el, "lambda5", set, clear, cleanups);
           }
