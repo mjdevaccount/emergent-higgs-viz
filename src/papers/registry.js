@@ -6,26 +6,22 @@
 // Papers are displayed in chronological order.
 
 import higgs2026 from "./2026-higgs/meta.js";
+import universe2024 from "./2024-universe/meta.js";
 
 const papers = [
   {
+    ...universe2024,
+    load: () => import("./2024-universe/index.jsx"),
+    color: "#00d4ff",
+    tagline: "An asymptotically static universe, with a Big Bang in between.",
+  },
+  {
     ...higgs2026,
-    // Lazy-load the paper component to keep initial bundle small
     load: () => import("./2026-higgs/index.jsx"),
     loadJourney: () => import("./2026-higgs/journey/JourneyShell.jsx"),
-    color: "#ffd700",     // Timeline accent color
+    color: "#ffd700",
     tagline: "Mass is born inside the black hole.",
   },
-  // ── Future papers (uncomment as implemented) ──
-  // {
-  //   id: "2024-universe",
-  //   year: 2024,
-  //   shortTitle: "Infinitely Old Universe",
-  //   ...universe2024,
-  //   load: () => import("./2024-universe/index.jsx"),
-  //   color: "#00d4ff",
-  //   tagline: "An asymptotically static universe, with a Big Bang in between.",
-  // },
   // {
   //   id: "2024-symmetry",
   //   year: 2024,
