@@ -1,5 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import Eq from "./Eq.jsx";
+import HoverTerm from "./HoverTerm.jsx";
+import { TERMS } from "./highlight.js";
 import TransitionDiagram from "../components/TransitionDiagram.jsx";
 
 export default function Transition() {
@@ -28,8 +30,8 @@ export default function Transition() {
 
       <p style={prose}>
         After transition, two paths are possible: a natural drop to the deep
-        well minimum at <Eq tex="r_h" />, or quantum tunneling outward to the
-        accretion disk at <Eq tex="r_a" />. The two scalar
+        well minimum at <HoverTerm term={TERMS.rh}><Eq tex="r_h" /></HoverTerm>, or quantum tunneling outward to the
+        accretion disk at <HoverTerm term={TERMS.ra}><Eq tex="r_a" /></HoverTerm>. The two scalar
         fields <Eq tex="\psi_s" /> (positive VEV)
         and <Eq tex="\psi_a" /> (negative VEV) are statistically entangled to
         ensure VEV preservation, with a tunneling
@@ -42,8 +44,8 @@ export default function Transition() {
         )}
         <div style={caption}>
           <strong>Figure 4.</strong> Transition point with drop to the ground
-          state at <Eq tex="r_h" />, or tunneling to the accretion disk
-          at <Eq tex="r_a" />.
+          state at <HoverTerm term={TERMS.rh}><Eq tex="r_h" /></HoverTerm>, or tunneling to the accretion disk
+          at <HoverTerm term={TERMS.ra}><Eq tex="r_a" /></HoverTerm>.
         </div>
       </div>
     </section>

@@ -1,7 +1,8 @@
-import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
+import HoverTerm from "./HoverTerm.jsx";
 import { useHighlight } from "./HighlightContext.jsx";
+import { TERMS } from "./highlight.js";
 import VevBreakdown from "../components/VevBreakdown.jsx";
 
 export default function VevConservation({ radialPos, onChangeR }) {
@@ -25,7 +26,8 @@ export default function VevConservation({ radialPos, onChangeR }) {
       <p style={prose}>
         Setting the derivative to zero
         gives <Eq tex="\phi_{\text{vev}} = \sqrt{5}\,v = 246" /> GeV.
-        The observed VEV is preserved, but now:
+        The observed VEV is preserved, but now the{" "}
+        <HoverTerm term={TERMS.lambda5}>factor of 1/5</HoverTerm> means:
       </p>
 
       <Eq display num="59" tex={`
@@ -34,8 +36,9 @@ export default function VevConservation({ radialPos, onChangeR }) {
       `} />
 
       <p style={prose}>
-        <strong>Inside the black hole, the Higgs perturbation dominates.</strong> The
-        factor of 1/5 is a simple consequence of VEV conservation when
+        <strong>Inside the black hole, the Higgs perturbation dominates.</strong> The{" "}
+        <HoverTerm term={TERMS.lambda5}>factor of 1/5</HoverTerm> is a simple
+        consequence of VEV conservation when
         perturbations in <Eq tex="h" /> carry the field strength rather
         than <Eq tex="v" />:
       </p>
@@ -48,7 +51,8 @@ export default function VevConservation({ radialPos, onChangeR }) {
 
       <p style={prose}>
         A more general potential that preserves <Eq tex="\phi_{\text{vev}}" /> regardless
-        of the mapping space restores the SM quartic coupling:
+        of the mapping space restores the SM quartic coupling at{" "}
+        <HoverTerm term={TERMS.r0}><Eq tex="r_0" /></HoverTerm>:
       </p>
 
       <Eq display num="63" tex={`

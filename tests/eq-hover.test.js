@@ -1,9 +1,8 @@
-// Tests that KaTeX DOM scanning finds hoverable terms.
-// Catches bugs like U+200B zero-width spaces breaking text matching.
+// Tests that KaTeX renders valid HTML (no parse errors) for all
+// equations used in the paper sections.
 // Run: node tests/eq-hover.test.js
 
 import katex from "katex";
-import { parseHTML } from "linkedom";
 
 let passed = 0, failed = 0;
 
@@ -16,42 +15,6 @@ function assert(name, condition, detail) {
   }
 }
 
-// ─── Reproduce the exact scanning logic from Eq.jsx ───
-
-const strip = (s) => s.replace(/[\s\u200B]/g, "");
-
-function scanTerms(html) {
-  const { document } = parseHTML(`<div>${html}</div>`);
-  const root = document.querySelector("div");
-  const found = {};
-
-  const allSpans = root.querySelectorAll(
-    ".katex-html .mord, .katex-html .mfrac"
-  );
-
-  for (const el of allSpans) {
-    const text = strip(el.textContent);
-
-    if (text === "r0" && el.querySelector(".msupsub")) {
-      found.r0 = (found.r0 || 0) + 1;
-    }
-    if (text === "rh" && el.querySelector(".msupsub")) {
-      found.rh = (found.rh || 0) + 1;
-    }
-    if (text === "ra" && el.querySelector(".msupsub")) {
-      found.ra = (found.ra || 0) + 1;
-    }
-    if (el.classList.contains("mfrac")) {
-      const digits = strip(el.textContent).split("").sort().join("");
-      if (digits === "15") {
-        found.lambda5 = (found.lambda5 || 0) + 1;
-      }
-    }
-  }
-
-  return found;
-}
-
 function render(tex, displayMode = false) {
   return katex.renderToString(tex, {
     displayMode,
@@ -60,81 +23,48 @@ function render(tex, displayMode = false) {
   });
 }
 
-// ─── Tests ───
-
-console.log("Equation hover term detection:");
-
-// Inline subscript terms
-{
-  const found = scanTerms(render("r_0"));
-  assert("r_0 inline detected", found.r0 === 1,
-    `expected 1, got ${found.r0 || 0}`);
+function assertRenders(label, tex, displayMode = false) {
+  const html = render(tex, displayMode);
+  const hasError = html.includes("katex-error");
+  assert(`${label} renders without error`, !hasError,
+    hasError ? `KaTeX error in: ${tex.slice(0, 60)}` : undefined);
+  return html;
 }
 
-{
-  const found = scanTerms(render("r_h"));
-  assert("r_h inline detected", found.rh === 1,
-    `expected 1, got ${found.rh || 0}`);
-}
+// ─── Tests: all equations used in paper sections ───
 
-{
-  const found = scanTerms(render("r_a"));
-  assert("r_a inline detected", found.ra === 1,
-    `expected 1, got ${found.ra || 0}`);
-}
+console.log("KaTeX equation rendering:");
 
-// r_0^2 should NOT match r0 (text is "r02")
-{
-  const found = scanTerms(render("r_0^2"));
-  assert("r_0^2 does NOT match r0", !found.r0,
-    `false positive: matched ${found.r0} times`);
-}
+// Inline terms (used with HoverTerm wrappers)
+assertRenders("r_0 inline", "r_0");
+assertRenders("r_h inline", "r_h");
+assertRenders("r_a inline", "r_a");
+assertRenders("lambda/5 inline", "\\lambda/5");
+assertRenders("phi inline", "\\phi");
+assertRenders("U^- inline", "U^-");
+assertRenders("U^+ inline", "U^+");
 
-// Fraction 1/5
-{
-  const found = scanTerms(render(String.raw`\frac{1}{5}`, true));
-  assert("\\frac{1}{5} detected as lambda5", found.lambda5 >= 1,
-    `expected >=1, got ${found.lambda5 || 0}`);
-}
+// Display equations from SymmetryBreaking (Eq. 32)
+assertRenders("Eq.32 display", String.raw`\frac{U_\pm(r)}{m^2 \phi^2} = 2\left\{1 +
+  \frac{2}{r^2}\left(\frac{1}{4} \mp \sqrt{\frac{r^2}{2r_0^2} - \frac{3}{16}}\right)^{\!2} +
+  \frac{2}{r^4}\left(\frac{1}{4} \pm \sqrt{\frac{r^2}{2r_0^2} - \frac{3}{16}}\right)^{\!2}
+  \right\}`, true);
 
-// Other fractions should NOT match lambda5
-{
-  const found = scanTerms(render(String.raw`\frac{1}{2}`, true));
-  assert("\\frac{1}{2} does NOT match lambda5", !found.lambda5,
-    `false positive`);
-}
+// VevConservation (Eq. 57)
+assertRenders("Eq.57 display", String.raw`U^{\text{SU(2)}}_{-}(r < r_0) = \text{const.} - \frac{1}{2}\mu^2 \phi^2
+  + \frac{1}{5} \cdot \frac{1}{4} \frac{\mu^2}{v^2} \phi^4`, true);
 
-{
-  const found = scanTerms(render(String.raw`\frac{3}{16}`, true));
-  assert("\\frac{3}{16} does NOT match lambda5", !found.lambda5,
-    `false positive`);
-}
+// BlackHole (Eq. 38)
+assertRenders("Eq.38 display", String.raw`U(r_h, \tilde{z}) = \text{const.} + \frac{m^2 \phi^2_{r_h}}{2}
+  \left\{ -\frac{15}{16}\tilde{z}^2 + \frac{1}{16}\tilde{z}^4 \right\}`, true);
 
-// Real equations from the paper
-{
-  const tex = String.raw`U^{\text{SU(2)}}_{-}(r < r_0) = \text{const.} - \frac{1}{2}\mu^2 \phi^2 + \frac{1}{5} \cdot \frac{1}{4} \frac{\mu^2}{v^2} \phi^4`;
-  const found = scanTerms(render(tex, true));
-  assert("Eq.57: finds r_0", found.r0 >= 1,
-    `expected >=1, got ${found.r0 || 0}`);
-  assert("Eq.57: finds 1/5", found.lambda5 >= 1,
-    `expected >=1, got ${found.lambda5 || 0}`);
-}
+// BlackHole (Eq. 40)
+assertRenders("Eq.40 display", String.raw`U^{\text{SU(2)}}_{-}(r_h) = \text{const.} - \mu^2 \Phi^\dagger_s \Phi_s
+  + \frac{\lambda}{5} (\Phi^\dagger_s \Phi_s)^2`, true);
 
-{
-  const tex = String.raw`r_h \approx 0.65\,r_0`;
-  const found = scanTerms(render(tex));
-  assert("Prose 'r_h ≈ 0.65 r_0': finds r_h", found.rh >= 1,
-    `expected >=1, got ${found.rh || 0}`);
-  assert("Prose 'r_h ≈ 0.65 r_0': finds r_0", found.r0 >= 1,
-    `expected >=1, got ${found.r0 || 0}`);
-}
-
-{
-  const tex = String.raw`r_a \approx 3.10\,r_0`;
-  const found = scanTerms(render(tex));
-  assert("Prose 'r_a ≈ 3.10 r_0': finds r_a", found.ra >= 1,
-    `expected >=1, got ${found.ra || 0}`);
-}
+// VevConservation (Eq. 59)
+assertRenders("Eq.59 display", String.raw`\phi^2_{\text{vev}} = v^2 + h^2 = 5v^2
+  \quad \Rightarrow \quad h^2 = 4v^2 \gg v^2`, true);
 
 // ─── Summary ───
 

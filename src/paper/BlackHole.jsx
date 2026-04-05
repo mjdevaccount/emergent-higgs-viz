@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
+import HoverTerm from "./HoverTerm.jsx";
+import { TERMS } from "./highlight.js";
 import SombreroViz from "../components/SombreroViz.jsx";
 
 export default function BlackHole({ radialPos, onChangeR }) {
@@ -21,10 +23,10 @@ export default function BlackHole({ radialPos, onChangeR }) {
       <h2 style={heading}>3.3–3.4. The Schwarzschild Black Hole & Accretion Disk</h2>
 
       <p style={prose}>
-        At the minimum of the steep well potential (<Eq tex="r_h" />), a variable
+        At the minimum of the steep well potential (<HoverTerm term={TERMS.rh}><Eq tex="r_h" /></HoverTerm>), a variable
         transformation <Eq tex="\tilde{z} = \sqrt{3/2} + \sigma_r / r_0" /> yields
         a sombrero hat potential identical to the Standard Model — except the
-        quartic coupling is <Eq tex="\lambda/5" />.
+        quartic coupling is <HoverTerm term={TERMS.lambda5}><Eq tex="\lambda/5" /></HoverTerm>.
       </p>
 
       <Eq display num="38" tex={`
@@ -57,7 +59,7 @@ export default function BlackHole({ radialPos, onChangeR }) {
         <Slider value={radialPos} onChange={onChangeR} />
         <div style={caption}>
           <strong>Sombrero potential</strong> — shape warps with radial position.
-          At <Eq tex="r_h" /> the bowl is wide and shallow (<Eq tex="\lambda/5" />).
+          At <HoverTerm term={TERMS.rh}><Eq tex="r_h" /></HoverTerm> the bowl is wide and shallow (<HoverTerm term={TERMS.lambda5}><Eq tex="\lambda/5" /></HoverTerm>).
         </div>
       </div>
     </section>

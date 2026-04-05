@@ -1,7 +1,9 @@
 import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
+import HoverTerm from "./HoverTerm.jsx";
 import { useHighlight } from "./HighlightContext.jsx";
+import { TERMS } from "./highlight.js";
 import DualPotentialPlot from "../components/DualPotential.jsx";
 
 export default function SymmetryBreaking({ radialPos, onChangeR }) {
@@ -36,9 +38,10 @@ export default function SymmetryBreaking({ radialPos, onChangeR }) {
       `} />
 
       <p style={prose}>
-        The ground state follows <Eq tex="U^-" /> inside <Eq tex="r_0" /> (deep
-        well at <Eq tex="r_h \approx 0.65\,r_0" />) and <Eq tex="U^+" /> outside
-        (shallow well at <Eq tex="r_a \approx 3.10\,r_0" />, the accretion disk).
+        The ground state follows <Eq tex="U^-" /> inside{" "}
+        <HoverTerm term={TERMS.r0}><Eq tex="r_0" /></HoverTerm> (deep
+        well at <HoverTerm term={TERMS.rh}><Eq tex="r_h \approx 0.65\,r_0" /></HoverTerm>) and <Eq tex="U^+" /> outside
+        (shallow well at <HoverTerm term={TERMS.ra}><Eq tex="r_a \approx 3.10\,r_0" /></HoverTerm>, the accretion disk).
         Drag the slider to explore:
       </p>
 

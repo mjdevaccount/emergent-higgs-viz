@@ -1,5 +1,7 @@
 import { R_MIN, R_H, R_T, R_0, R_A } from "../physics.js";
 import Eq from "./Eq.jsx";
+import HoverTerm from "./HoverTerm.jsx";
+import { TERMS } from "./highlight.js";
 
 export default function Framework() {
   return (
@@ -35,14 +37,18 @@ export default function Framework() {
         </thead>
         <tbody>
           {[
-            ["r_{\\min}", `\\sqrt{3/8}\\,r_0 \\approx ${R_MIN.toFixed(3)}\\,r_0`, "Minimum physical radius"],
-            ["r_h", `\\sqrt{5-\\sqrt{21}}\\,r_0 \\approx ${R_H.toFixed(3)}\\,r_0`, "Deep well minimum"],
-            ["r_T", `\\sqrt{7/8}\\,r_0 \\approx ${R_T.toFixed(3)}\\,r_0`, "Transition point"],
-            ["r_0", "1.000\\,r_0", "Schwarzschild radius"],
-            ["r_a", `\\sqrt{5+\\sqrt{21}}\\,r_0 \\approx ${R_A.toFixed(2)}\\,r_0`, "Accretion disk"],
-          ].map(([sym, val, meaning]) => (
+            ["r_{\\min}", `\\sqrt{3/8}\\,r_0 \\approx ${R_MIN.toFixed(3)}\\,r_0`, "Minimum physical radius", null],
+            ["r_h", `\\sqrt{5-\\sqrt{21}}\\,r_0 \\approx ${R_H.toFixed(3)}\\,r_0`, "Deep well minimum", TERMS.rh],
+            ["r_T", `\\sqrt{7/8}\\,r_0 \\approx ${R_T.toFixed(3)}\\,r_0`, "Transition point", null],
+            ["r_0", "1.000\\,r_0", "Schwarzschild radius", TERMS.r0],
+            ["r_a", `\\sqrt{5+\\sqrt{21}}\\,r_0 \\approx ${R_A.toFixed(2)}\\,r_0`, "Accretion disk", TERMS.ra],
+          ].map(([sym, val, meaning, term]) => (
             <tr key={sym}>
-              <td style={td}><Eq tex={sym} /></td>
+              <td style={td}>
+                {term
+                  ? <HoverTerm term={term}><Eq tex={sym} /></HoverTerm>
+                  : <Eq tex={sym} />}
+              </td>
               <td style={td}><Eq tex={val} /></td>
               <td style={{ ...td, color: "rgba(200,210,220,0.6)" }}>{meaning}</td>
             </tr>
