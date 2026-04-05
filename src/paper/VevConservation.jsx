@@ -1,13 +1,16 @@
 import { useRef, useEffect, useState } from "react";
 import { R_MIN } from "../physics.js";
 import Eq from "./Eq.jsx";
+import { useHighlight } from "./HighlightContext.jsx";
 import VevBreakdown from "../components/VevBreakdown.jsx";
 
 export default function VevConservation({ radialPos, onChangeR }) {
+  const { active } = useHighlight();
 
   return (
     <section style={section}>
       <h2 style={heading}>3.8. Conservation of VEV and Restoration of SM &lambda;</h2>
+      <div style={centralTag}>Central Result</div>
 
       <p style={prose}>
         This is the central result. Inside the Schwarzschild sphere, the
@@ -56,7 +59,7 @@ export default function VevConservation({ radialPos, onChangeR }) {
 
       {/* Interactive VEV breakdown */}
       <div style={figureBox}>
-        <VevBreakdown radialPos={radialPos} />
+        <VevBreakdown radialPos={radialPos} highlight={active} />
         <Slider value={radialPos} onChange={onChangeR} />
       </div>
     </section>
@@ -78,8 +81,23 @@ function Slider({ value, onChange }) {
   );
 }
 
-const section = { maxWidth: 740, margin: "0 auto", padding: "24px 32px", borderTop: "1px solid rgba(255,215,0,0.1)" };
-const heading = { fontSize: 22, fontWeight: 400, marginBottom: 16, color: "#ffd700" };
+const section = {
+  maxWidth: 740,
+  margin: "0 auto",
+  padding: "24px 32px",
+  borderTop: "2px solid rgba(255,215,0,0.2)",
+  borderBottom: "1px solid rgba(255,215,0,0.1)",
+  background: "linear-gradient(180deg, rgba(255,215,0,0.03) 0%, transparent 40%)",
+};
+const heading = { fontSize: 22, fontWeight: 400, marginBottom: 4, color: "#ffd700" };
+const centralTag = {
+  fontFamily: "'IBM Plex Mono', monospace",
+  fontSize: 9,
+  letterSpacing: 3,
+  color: "rgba(255,215,0,0.4)",
+  textTransform: "uppercase",
+  marginBottom: 16,
+};
 const prose = { fontSize: 16, fontWeight: 300, lineHeight: 1.8, color: "rgba(200,210,220,0.75)", margin: "16px 0" };
 const figureBox = { background: "rgba(8,12,24,0.5)", border: "1px solid rgba(0,212,255,0.08)", borderRadius: 8, padding: "24px 16px", margin: "24px 0" };
 const sliderLabel = { display: "flex", justifyContent: "space-between", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(180,200,220,0.4)" };

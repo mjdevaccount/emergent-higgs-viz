@@ -1,14 +1,22 @@
 import { VEV, vevBreakdown, R_0, R_H, R_A } from "../physics.js";
 
-export default function VevBreakdown({ radialPos }) {
+export default function VevBreakdown({ radialPos, highlight }) {
   const { v, h, f } = vevBreakdown(radialPos);
   const vFrac = (v * v) / (VEV * VEV);
   const hFrac = (h * h) / (VEV * VEV);
   const isHiggsDominant = hFrac > 0.5;
   const nearMinimum = f < 0.3;
+  const isGlowing = highlight === "lambda5" || highlight === "r0";
 
   return (
-    <div style={{ padding: "0 16px", maxWidth: 420, margin: "0 auto" }}>
+    <div style={{
+      padding: "0 16px",
+      maxWidth: 420,
+      margin: "0 auto",
+      transition: "box-shadow 0.3s ease",
+      boxShadow: isGlowing ? "0 0 24px rgba(255,215,0,0.15)" : "none",
+      borderRadius: 8,
+    }}>
       {/* Title */}
       <div style={title}>VEV Conservation — Eq. 55–62</div>
 
