@@ -50,13 +50,11 @@ export default function Eq({ tex, display = false, num }) {
       }
 
       // Match fractions that look like 1/5
+      // KaTeX duplicates .mord elements in vlist, so check total text instead
       if (el.classList.contains("mfrac")) {
-        const nums = el.querySelectorAll(".mord");
-        if (nums.length >= 2) {
-          const numText = Array.from(nums).map(n => strip(n.textContent));
-          if (numText.includes("1") && numText.includes("5") && numText.length <= 3) {
-            attachHover(el, "lambda5", set, clear, cleanups);
-          }
+        const digits = strip(el.textContent).split("").sort().join("");
+        if (digits === "15") {
+          attachHover(el, "lambda5", set, clear, cleanups);
         }
       }
     }
