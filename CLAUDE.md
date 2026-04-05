@@ -48,5 +48,5 @@ Use `/add-paper YEAR-shortname` — see `.claude/skills/add-paper/SKILL.md` for 
 |------|-------|-------|--------|
 | 2026 | Emergent Higgs (particles9020037) | 44 + 38 | Complete |
 | 2024 | Infinitely Old Universe (universe10100400) | 41 + 22 | Complete |
-| 2024 | Stochastic Spacetime (sym16010036) | — | Planned |
-| 2023 | Hubble Tension (astro-2022-0221) | — | Planned |
+| 2024 | Stochastic Spacetime (sym16010036) | 86 + 20 | Complete |
+| 2023 | Hubble Tension (astro-2022-0221) | 70 + 13 | Complete |
