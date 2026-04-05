@@ -1,60 +1,53 @@
 import { useRef, useEffect } from "react";
 import { R_MIN, R_H, R_0, R_A, alpha1Minus, alpha1Plus, alpha2Plus } from "../physics.js";
+import { colors, rgba, canvas as canvasFonts } from "../theme.js";
+import {
+  setupCanvas, makeScales, drawRefLines, drawMarker,
+  drawLegend, drawAxes, drawYTicks, drawCurve, drawHLine,
+} from "../canvas-utils.js";
 
 export default function EntropyMap({ radialPos, width, height }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
+    const result = setupCanvas(canvasRef, width, height);
+    if (!result) return;
+    const { ctx } = result;
 
     const pad = { top: 30, right: 20, bottom: 45, left: 50 };
-    const w = width - pad.left - pad.right;
-    const h = height - pad.top - pad.bottom;
-
-    ctx.clearRect(0, 0, width, height);
-
     const rMin = R_MIN + 0.001;
     const rMax = 4.0;
     const steps = 400;
 
-    // Compute α₁⁻ (ground state inside r₀)
+    // Compute ground-state alpha1
     const points = [];
     for (let i = 0; i <= steps; i++) {
       const r = rMin + ((rMax - rMin) * i) / steps;
-      // Use ground-state α₁: α₁⁻ inside r₀, α₁⁺ outside
       const a = r <= R_0 ? alpha1Minus(r) : alpha1Plus(r);
-      if (!isNaN(a)) points.push({ r, a });
+      if (!isNaN(a)) points.push({ r, v: a });
     }
 
-    const viewMin = -10;
-    const viewMax = 30;
+    // Alpha2+ curve points
+    const points2 = [];
+    for (let i = 0; i <= steps; i++) {
+      const r = rMin + ((rMax - rMin) * i) / steps;
+      const a2 = alpha2Plus(r);
+      if (!isNaN(a2)) points2.push({ r, v: a2 });
+    }
 
-    const toX = (r) => pad.left + ((r - rMin) / (rMax - rMin)) * w;
-    const toY = (a) => pad.top + h - ((a - viewMin) / (viewMax - viewMin)) * h;
+    const { toX, toY, w, h } = makeScales(pad, width, height, [rMin, rMax], [-10, 30]);
 
-    // Zero line (entropy sign boundary)
-    const y0 = toY(0);
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath();
-    ctx.moveTo(pad.left, y0);
-    ctx.lineTo(pad.left + w, y0);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // Zero line
+    drawHLine(ctx, pad, w, toY, 0, {
+      color: "rgba(255,255,255,0.15)",
+      label: "\u03b1\u2081 = 0 (entropy sign change)",
+    });
 
     // Entropy region shading
-    // S ∝ -α₁ → positive entropy when α₁ < 0, negative when α₁ > 0
     for (let i = 0; i < points.length - 1; i++) {
       const x1 = toX(points[i].r);
       const x2 = toX(points[i + 1].r);
-      const isPositiveEntropy = points[i].a < 0;
+      const isPositiveEntropy = points[i].v < 0;
       ctx.fillStyle = isPositiveEntropy
         ? "rgba(0,200,100,0.06)"
         : "rgba(255,80,80,0.04)";
@@ -62,89 +55,37 @@ export default function EntropyMap({ radialPos, width, height }) {
     }
 
     // Region labels
-    ctx.font = "9px 'IBM Plex Mono', monospace";
+    ctx.font = canvasFonts.monoSm;
     ctx.textAlign = "center";
     ctx.fillStyle = "rgba(0,200,100,0.5)";
     ctx.fillText("S > 0", pad.left + w * 0.12, pad.top + 14);
     ctx.fillStyle = "rgba(255,100,100,0.4)";
     ctx.fillText("S < 0", pad.left + w * 0.55, pad.top + 14);
 
-    // α₁ zero label
-    ctx.fillStyle = "rgba(255,255,255,0.3)";
-    ctx.textAlign = "left";
-    ctx.fillText("α₁ = 0 (entropy sign change)", pad.left + 4, y0 - 4);
-
     // Key radii
-    for (const { r, color, label } of [
-      { r: R_H, color: "rgba(0,212,255,0.35)", label: "rₕ" },
-      { r: R_0, color: "rgba(255,80,80,0.35)", label: "r₀" },
-      { r: R_A, color: "rgba(255,200,50,0.25)", label: "rₐ" },
-    ]) {
-      if (r > rMax) continue;
-      const x = toX(r);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
-      ctx.beginPath();
-      ctx.moveTo(x, pad.top);
-      ctx.lineTo(x, pad.top + h);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = color;
-      ctx.font = "italic 10px 'Cormorant Garamond', Georgia, serif";
-      ctx.textAlign = "center";
-      ctx.fillText(label, x, pad.top + h + 14);
-    }
+    drawRefLines(ctx, [
+      { value: R_H, color: rgba(colors.cyan, 0.35), label: "r\u2095" },
+      { value: R_0, color: "rgba(255,80,80,0.35)", label: "r\u2080" },
+      { value: R_A, color: "rgba(255,200,50,0.25)", label: "r\u2090" },
+    ], toX, pad, h, { domainMax: rMax });
 
-    // α₁ curve
-    ctx.shadowColor = "rgba(0,212,255,0.4)";
-    ctx.shadowBlur = 8;
-    ctx.strokeStyle = "#00d4ff";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    let started = false;
-    for (const p of points) {
-      const x = toX(p.r);
-      const yRaw = toY(p.a);
-      const y = Math.max(pad.top, Math.min(pad.top + h, yRaw));
-      if (yRaw < pad.top - 80 || yRaw > pad.top + h + 80) {
-        started = false;
-        continue;
-      }
-      if (!started) { ctx.moveTo(x, y); started = true; }
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-    ctx.shadowBlur = 0;
+    // Alpha1 curve
+    drawCurve(ctx, points, toX, toY, pad, h, {
+      color: colors.cyan, lineWidth: 2,
+      glow: rgba(colors.cyan, 0.4),
+    });
 
-    // α₂⁺ curve (paper's Figure 6 plots both)
-    ctx.strokeStyle = "rgba(255,150,50,0.5)";
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    started = false;
-    for (let i = 0; i <= steps; i++) {
-      const r2 = rMin + ((rMax - rMin) * i) / steps;
-      const a2 = alpha2Plus(r2);
-      if (isNaN(a2)) continue;
-      const x = toX(r2);
-      const yRaw = toY(a2);
-      const y = Math.max(pad.top, Math.min(pad.top + h, yRaw));
-      if (yRaw < pad.top - 80 || yRaw > pad.top + h + 80) { started = false; continue; }
-      if (!started) { ctx.moveTo(x, y); started = true; }
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // Alpha2+ curve
+    drawCurve(ctx, points2, toX, toY, pad, h, {
+      color: rgba(colors.orange, 0.5), lineWidth: 1.5,
+      dash: [4, 3],
+    });
 
     // Legend
-    ctx.font = "9px 'IBM Plex Mono', monospace";
-    ctx.textAlign = "right";
-    const lx = pad.left + w - 4;
-    ctx.fillStyle = "#00d4ff";
-    ctx.fillText("━━ α₁⁻ (ground)", lx, pad.top + h - 20);
-    ctx.fillStyle = "rgba(255,150,50,0.7)";
-    ctx.fillText("┅┅ α₂⁺", lx, pad.top + h - 8);
+    drawLegend(ctx, [
+      { symbol: "\u2501\u2501", label: "\u03b1\u2081\u207b (ground)", color: colors.cyan },
+      { symbol: "\u2505\u2505", label: "\u03b1\u2082\u207a", color: rgba(colors.orange, 0.7) },
+    ], pad.left + w - 4, pad.top + h - 20);
 
     // Position marker
     const r = radialPos;
@@ -152,34 +93,12 @@ export default function EntropyMap({ radialPos, width, height }) {
     if (!isNaN(curA)) {
       const mx = toX(r);
       const my = Math.max(pad.top, Math.min(pad.top + h, toY(curA)));
-      ctx.shadowColor = "rgba(255,215,0,0.8)";
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = "#ffd700";
-      ctx.beginPath();
-      ctx.arc(mx, my, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
+      drawMarker(ctx, mx, my);
     }
 
-    // Axes
-    ctx.fillStyle = "rgba(180,200,220,0.5)";
-    ctx.font = "11px 'IBM Plex Mono', monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("r / r₀", pad.left + w / 2, pad.top + h + 38);
-
-    ctx.save();
-    ctx.translate(14, pad.top + h / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText("α₁ (ground state)", 0, 0);
-    ctx.restore();
-
-    // Y ticks
-    ctx.fillStyle = "rgba(180,200,220,0.3)";
-    ctx.font = "9px 'IBM Plex Mono', monospace";
-    ctx.textAlign = "right";
-    for (let v = -10; v <= 30; v += 10) {
-      ctx.fillText(v.toString(), pad.left - 5, toY(v) + 3);
-    }
+    // Axes & ticks
+    drawAxes(ctx, pad, w, h, { xLabel: "r / r\u2080", yLabel: "\u03b1\u2081 (ground state)" });
+    drawYTicks(ctx, toY, pad, { min: -10, max: 30, step: 10, decimals: 0 });
   }, [radialPos, width, height]);
 
   return <canvas ref={canvasRef} style={{ width, height }} />;

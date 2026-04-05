@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { R_MIN, R_0, R_A, R_H, groundState, excitedState } from "./physics.js";
+import { colors, rgba, fonts, styles } from "./theme.js";
 import StarField from "./components/StarField.jsx";
 import DualPotentialPlot from "./components/DualPotential.jsx";
 import CouplingPlot from "./components/CouplingPlot.jsx";
@@ -139,11 +140,11 @@ export default function EmergentHiggs() {
 
         {/* ── Dual Potential Plot ── */}
         <section style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "24px 16px" : "40px 32px" }}>
-          <div style={sectionTitle}>Dual Potential States U±(r) — Eq. 32</div>
-          <div style={panelBox}>
+          <div style={styles.sectionTitle}>Dual Potential States U±(r) — Eq. 32</div>
+          <div style={styles.panelBox}>
             {wideW > 0 && <DualPotentialPlot radialPos={radialPos} width={wideW} height={panelH + 40} />}
           </div>
-          <div style={caption}>
+          <div style={styles.caption}>
             U⁻ is ground state inside r₀ &nbsp;·&nbsp; U⁺ is ground state outside r₀ &nbsp;·&nbsp; Crossover at Schwarzschild radius
           </div>
         </section>
@@ -162,18 +163,18 @@ export default function EmergentHiggs() {
           }}
         >
           <div>
-            <div style={sectionTitle}>Quartic Coupling f±(r) — Eq. 51</div>
-            <div style={panelBox}>
+            <div style={styles.sectionTitle}>Quartic Coupling f±(r) — Eq. 51</div>
+            <div style={styles.panelBox}>
               {panelW > 0 && <CouplingPlot radialPos={radialPos} width={panelW} height={panelH} />}
             </div>
-            <div style={caption}>Coupling drops toward λ/5 at potential minima</div>
+            <div style={styles.caption}>Coupling drops toward λ/5 at potential minima</div>
           </div>
           <div>
-            <div style={sectionTitle}>Sombrero Potential — Eq. 48</div>
-            <div style={panelBox}>
+            <div style={styles.sectionTitle}>Sombrero Potential — Eq. 48</div>
+            <div style={styles.panelBox}>
               {panelW > 0 && <SombreroViz radialPos={radialPos} width={panelW} height={panelH} />}
             </div>
-            <div style={caption}>Shape morphs with radial position — VEV conserved</div>
+            <div style={styles.caption}>Shape morphs with radial position — VEV conserved</div>
           </div>
         </section>
 
@@ -280,37 +281,37 @@ export default function EmergentHiggs() {
           <LambdaGauge radialPos={radialPos} />
 
           <div style={{ textAlign: "center", padding: "0 16px" }}>
-            <div style={metricLabel}>Ground State</div>
-            <div style={{ ...metricValue, color: "#ffd700" }}>
+            <div style={styles.metricLabel}>Ground State</div>
+            <div style={{ ...styles.metricValue, color: colors.gold }}>
               {!isNaN(groundV) ? groundV.toFixed(3) : "—"}
             </div>
-            <div style={metricSub}>
+            <div style={styles.metricSub}>
               {radialPos <= R_0 ? "U⁻ (inside r₀)" : "U⁺ (outside r₀)"}
             </div>
           </div>
 
           <div style={{ textAlign: "center", padding: "0 16px" }}>
-            <div style={metricLabel}>Region</div>
+            <div style={styles.metricLabel}>Region</div>
             <div
               style={{
-                ...metricValue,
+                ...styles.metricValue,
                 fontSize: 22,
-                color: radialPos <= R_0 ? "#00d4ff" : radialPos < R_A + 0.3 ? "#ffd700" : "#e0e8f0",
+                color: radialPos <= R_0 ? colors.cyan : radialPos < R_A + 0.3 ? colors.gold : colors.text,
                 minWidth: 150,
               }}
             >
               {regionLabel}
             </div>
-            <div style={metricSub}>r / r₀ = {radialPos.toFixed(3)}</div>
+            <div style={styles.metricSub}>r / r₀ = {radialPos.toFixed(3)}</div>
           </div>
 
           <div style={{ textAlign: "center", padding: "0 16px" }}>
-            <div style={metricLabel}>Higgs VEV</div>
-            <div style={metricValue}>
+            <div style={styles.metricLabel}>Higgs VEV</div>
+            <div style={styles.metricValue}>
               246
               <span style={{ fontSize: 16, marginLeft: 4, color: "rgba(180,200,220,0.5)" }}>GeV</span>
             </div>
-            <div style={metricSub}>CONSERVED ACROSS ALL r</div>
+            <div style={styles.metricSub}>CONSERVED ACROSS ALL r</div>
           </div>
         </div>
 
@@ -339,20 +340,20 @@ export default function EmergentHiggs() {
           }}
         >
           <div>
-            <div style={sectionTitle}>Transition & Tunneling — §3.6, §3.9</div>
-            <div style={panelBox}>
+            <div style={styles.sectionTitle}>Transition & Tunneling — §3.6, §3.9</div>
+            <div style={styles.panelBox}>
               {panelW > 0 && <TransitionDiagram width={panelW} height={panelH - 40} />}
             </div>
-            <div style={caption}>
+            <div style={styles.caption}>
               Natural drop to rₕ or tunneling to rₐ (1.13%)
             </div>
           </div>
           <div>
-            <div style={sectionTitle}>Vacuum Entropy α₁ — Eq. 95, 114</div>
-            <div style={panelBox}>
+            <div style={styles.sectionTitle}>Vacuum Entropy α₁ — Eq. 95, 114</div>
+            <div style={styles.panelBox}>
               {panelW > 0 && <EntropyMap radialPos={radialPos} width={panelW} height={panelH - 40} />}
             </div>
-            <div style={caption}>
+            <div style={styles.caption}>
               S &gt; 0 inside Schwarzschild sphere · S &lt; 0 in accretion region
             </div>
           </div>
@@ -402,55 +403,4 @@ export default function EmergentHiggs() {
   );
 }
 
-// ── Shared styles ───────────────────────────────────────────────
-const sectionTitle = {
-  fontFamily: "'IBM Plex Mono', monospace",
-  fontSize: 10,
-  letterSpacing: 3,
-  color: "rgba(0,212,255,0.6)",
-  textTransform: "uppercase",
-  marginBottom: 12,
-  textAlign: "center",
-};
-
-const panelBox = {
-  background: "rgba(8,12,24,0.7)",
-  border: "1px solid rgba(0,212,255,0.1)",
-  borderRadius: 8,
-  padding: 8,
-  backdropFilter: "blur(10px)",
-  display: "flex",
-  justifyContent: "center",
-};
-
-const caption = {
-  textAlign: "center",
-  marginTop: 10,
-  fontSize: 13,
-  fontStyle: "italic",
-  color: "rgba(180,200,220,0.4)",
-};
-
-const metricLabel = {
-  fontFamily: "'IBM Plex Mono', monospace",
-  fontSize: 11,
-  color: "rgba(180,200,220,0.5)",
-  letterSpacing: 2,
-  marginBottom: 8,
-  textTransform: "uppercase",
-};
-
-const metricValue = {
-  fontFamily: "'Cormorant Garamond', Georgia, serif",
-  fontSize: 36,
-  fontWeight: 300,
-  color: "#e0e8f0",
-  lineHeight: 1,
-};
-
-const metricSub = {
-  fontFamily: "'IBM Plex Mono', monospace",
-  fontSize: 10,
-  color: "rgba(180,200,220,0.3)",
-  marginTop: 12,
-};
+// Styles now imported from src/theme.js

@@ -4,29 +4,26 @@ import {
   potentialPlus, potentialMinus, groundState,
 } from "../physics.js";
 import { TERMS, isRadiusHighlighted } from "../paper/highlight.js";
+import { colors, rgba } from "../theme.js";
+import {
+  setupCanvas, makeScales, drawGrid, drawRefLines,
+  drawMarker, drawLegend, drawAxes, drawXTicks, drawYTicks,
+} from "../canvas-utils.js";
 
 export default function DualPotentialPlot({ radialPos, width, height, highlight }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
+    const result = setupCanvas(canvasRef, width, height);
+    if (!result) return;
+    const { ctx } = result;
 
     const pad = { top: 35, right: 25, bottom: 55, left: 60 };
-    const w = width - pad.left - pad.right;
-    const h = height - pad.top - pad.bottom;
-
-    ctx.clearRect(0, 0, width, height);
-
-    // Compute both curves
     const rMin = R_MIN + 0.001;
     const rMax = 4.0;
     const steps = 400;
+
+    // Compute both curves
     const pointsPlus = [];
     const pointsMinus = [];
     let vMin = Infinity, vMax = -Infinity;
@@ -47,60 +44,24 @@ export default function DualPotentialPlot({ radialPos, width, height, highlight 
 
     const viewMin = Math.max(vMin - 0.5, 0);
     const viewMax = Math.min(vMax + 1, 25);
-
-    const toX = (r) => pad.left + ((r - rMin) / (rMax - rMin)) * w;
-    const toY = (v) => pad.top + h - ((v - viewMin) / (viewMax - viewMin)) * h;
+    const { toX, toY, w, h } = makeScales(pad, width, height, [rMin, rMax], [viewMin, viewMax]);
 
     // Grid
-    ctx.strokeStyle = "rgba(0,212,255,0.06)";
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= 5; i++) {
-      const y = pad.top + (h * i) / 5;
-      ctx.beginPath();
-      ctx.moveTo(pad.left, y);
-      ctx.lineTo(pad.left + w, y);
-      ctx.stroke();
-    }
-    for (let i = 0; i <= 6; i++) {
-      const x = pad.left + (w * i) / 6;
-      ctx.beginPath();
-      ctx.moveTo(x, pad.top);
-      ctx.lineTo(x, pad.top + h);
-      ctx.stroke();
-    }
+    drawGrid(ctx, pad, w, h, { hLines: 5, vLines: 6 });
 
-    // Key radii vertical lines
+    // Key radii
     const radii = [
-      { r: R_MIN, label: "r_min", hlKey: "rmin", color: "rgba(180,180,180,0.3)", sublabel: `${R_MIN.toFixed(3)}r₀` },
-      { r: R_H, label: "rₕ", hlKey: TERMS.rh, color: "rgba(0,212,255,0.5)", sublabel: `${R_H.toFixed(3)}r₀` },
-      { r: R_T, label: "r_T", hlKey: "rt", color: "rgba(0,255,140,0.4)", sublabel: `${R_T.toFixed(3)}r₀` },
-      { r: R_0, label: "r₀", hlKey: TERMS.r0, color: "rgba(255,80,80,0.5)", sublabel: "Schwarzschild" },
-      { r: R_A, label: "rₐ", hlKey: TERMS.ra, color: "rgba(255,200,50,0.4)", sublabel: `${R_A.toFixed(2)}r₀` },
+      { value: R_MIN, label: "r_min", hlKey: "rmin", color: "rgba(180,180,180,0.3)", sublabel: `${R_MIN.toFixed(3)}r\u2080` },
+      { value: R_H, label: "r\u2095", hlKey: TERMS.rh, color: rgba(colors.cyan, 0.5), sublabel: `${R_H.toFixed(3)}r\u2080` },
+      { value: R_T, label: "r_T", hlKey: "rt", color: rgba(colors.green, 0.4), sublabel: `${R_T.toFixed(3)}r\u2080` },
+      { value: R_0, label: "r\u2080", hlKey: TERMS.r0, color: "rgba(255,80,80,0.5)", sublabel: "Schwarzschild" },
+      { value: R_A, label: "r\u2090", hlKey: TERMS.ra, color: rgba(colors.gold, 0.4), sublabel: `${R_A.toFixed(2)}r\u2080` },
     ];
-
-    for (const { r, label, hlKey, color, sublabel } of radii) {
-      if (r < rMin || r > rMax) continue;
-      const x = toX(r);
-      const isHl = isRadiusHighlighted(highlight, hlKey);
-      ctx.strokeStyle = isHl ? "#ffd700" : color;
-      ctx.lineWidth = isHl ? 3 : 1;
-      if (isHl) { ctx.shadowColor = "rgba(255,215,0,0.6)"; ctx.shadowBlur = 12; }
-      ctx.setLineDash(isHl ? [] : [4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(x, pad.top);
-      ctx.lineTo(x, pad.top + h);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.shadowBlur = 0;
-
-      ctx.fillStyle = isHl ? "#ffd700" : color.replace(/[\d.]+\)$/, "0.9)");
-      ctx.font = "italic 11px 'Cormorant Garamond', Georgia, serif";
-      ctx.textAlign = "center";
-      ctx.fillText(label, x, pad.top + h + 16);
-      ctx.font = "9px 'IBM Plex Mono', monospace";
-      ctx.fillStyle = isHl ? "rgba(255,215,0,0.7)" : color;
-      ctx.fillText(sublabel, x, pad.top + h + 28);
-    }
+    drawRefLines(ctx, radii, toX, pad, h, {
+      highlightKey: highlight,
+      isHighlighted: isRadiusHighlighted,
+      domainMax: rMax,
+    });
 
     // U+ curve
     ctx.shadowColor = "rgba(255,100,100,0.4)";
@@ -120,9 +81,9 @@ export default function DualPotentialPlot({ radialPos, width, height, highlight 
     ctx.shadowBlur = 0;
 
     // U- curve
-    ctx.shadowColor = "rgba(0,212,255,0.5)";
+    ctx.shadowColor = rgba(colors.cyan, 0.5);
     ctx.shadowBlur = 10;
-    ctx.strokeStyle = "#00d4ff";
+    ctx.strokeStyle = colors.cyan;
     ctx.lineWidth = 2.2;
     ctx.beginPath();
     started = false;
@@ -137,9 +98,9 @@ export default function DualPotentialPlot({ radialPos, width, height, highlight 
     ctx.shadowBlur = 0;
 
     // Ground state highlight
-    ctx.shadowColor = "rgba(255,215,0,0.3)";
+    ctx.shadowColor = rgba(colors.gold, 0.3);
     ctx.shadowBlur = 6;
-    ctx.strokeStyle = "rgba(255,215,0,0.5)";
+    ctx.strokeStyle = rgba(colors.gold, 0.5);
     ctx.lineWidth = 3.5;
     ctx.beginPath();
     started = false;
@@ -162,60 +123,24 @@ export default function DualPotentialPlot({ radialPos, width, height, highlight 
       const mx = toX(radialPos);
       const my = toY(curV);
       if (my >= pad.top && my <= pad.top + h) {
-        ctx.strokeStyle = "rgba(255,215,0,0.5)";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(mx, my, 10, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.shadowColor = "rgba(255,215,0,0.8)";
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = "#ffd700";
-        ctx.beginPath();
-        ctx.arc(mx, my, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        drawMarker(ctx, mx, my, { ring: true, radius: 4.5 });
       }
     }
 
     // Legend
-    ctx.font = "11px 'IBM Plex Mono', monospace";
-    const legendY = pad.top + 14;
-    const legendX = pad.left + w - 10;
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#00d4ff";
-    ctx.fillText("── U⁻", legendX, legendY);
-    ctx.fillStyle = "rgba(255,120,120,0.8)";
-    ctx.fillText("── U⁺", legendX, legendY + 16);
-    ctx.fillStyle = "rgba(255,215,0,0.8)";
-    ctx.fillText("━━ ground state", legendX, legendY + 32);
+    drawLegend(ctx, [
+      { symbol: "\u2500\u2500", label: "U\u207b", color: colors.cyan },
+      { symbol: "\u2500\u2500", label: "U\u207a", color: "rgba(255,120,120,0.8)" },
+      { symbol: "\u2501\u2501", label: "ground state", color: rgba(colors.gold, 0.8) },
+    ], pad.left + w - 10, pad.top + 14);
 
-    // Axes
-    ctx.fillStyle = "rgba(180,200,220,0.6)";
-    ctx.font = "12px 'IBM Plex Mono', monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("r / r₀", pad.left + w / 2, pad.top + h + 48);
-
-    ctx.save();
-    ctx.translate(14, pad.top + h / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText("U±(r) / m²φ²", 0, 0);
-    ctx.restore();
-
-    // X tick labels
-    ctx.fillStyle = "rgba(180,200,220,0.4)";
-    ctx.font = "10px 'IBM Plex Mono', monospace";
-    ctx.textAlign = "center";
-    for (let r = 1; r <= 4; r++) {
-      ctx.fillText(r.toString(), toX(r), pad.top + h + 42);
-    }
-
-    // Y tick labels
-    ctx.textAlign = "right";
-    for (let i = 0; i <= 5; i++) {
-      const v = viewMin + ((viewMax - viewMin) * i) / 5;
-      ctx.fillText(v.toFixed(1), pad.left - 6, toY(v) + 4);
-    }
+    // Axes & ticks
+    drawAxes(ctx, pad, w, h, { xLabel: "r / r\u2080", yLabel: "U\u00b1(r) / m\u00b2\u03c6\u00b2" });
+    drawXTicks(ctx, toX, pad, h);
+    drawYTicks(ctx, toY, pad, {
+      min: viewMin, max: viewMax,
+      step: (viewMax - viewMin) / 5, decimals: 1,
+    });
   }, [radialPos, width, height, highlight]);
 
   return <canvas ref={canvasRef} style={{ width, height }} />;
