@@ -5,11 +5,18 @@
 // To add a paper: import its meta.js here and add to the array.
 // Papers are displayed in chronological order.
 
+import hubble2023 from "./2023-hubble/meta.js";
 import higgs2026 from "./2026-higgs/meta.js";
 import symmetry2024 from "./2024-symmetry/meta.js";
 import universe2024 from "./2024-universe/meta.js";
 
 const papers = [
+  {
+    ...hubble2023,
+    load: () => import("./2023-hubble/index.jsx"),
+    color: "#ff6b6b",
+    tagline: "Dark energy is the diffusive nature of spacetime.",
+  },
   {
     ...symmetry2024,
     load: () => import("./2024-symmetry/index.jsx"),
@@ -29,15 +36,6 @@ const papers = [
     color: "#ffd700",
     tagline: "Mass is born inside the black hole.",
   },
-  // {
-  //   id: "2023-hubble",
-  //   year: 2023,
-  //   shortTitle: "Hubble Tension",
-  //   ...hubble2023,
-  //   load: () => import("./2023-hubble/index.jsx"),
-  //   color: "#ff6b6b",
-  //   tagline: "Dark energy is the diffusive nature of spacetime.",
-  // },
 ];
 
 export default papers;
