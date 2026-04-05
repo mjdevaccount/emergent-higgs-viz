@@ -1,10 +1,14 @@
 import { useRef, useEffect, useState } from "react";
 import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { useHighlight } from "@/shared/HighlightContext.jsx";
 import { styles } from "@/theme.js";
 import meta from "../meta.js";
+import { TERMS } from "../highlight.js";
 import AccelerationPlot from "../viz/AccelerationPlot.jsx";
 
 export default function Acceleration({ param, onChangeParam }) {
+  const { active } = useHighlight();
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
@@ -20,7 +24,9 @@ export default function Acceleration({ param, onChangeParam }) {
 
       <p style={styles.prose}>
         The acceleration parameter <Eq tex="-(1+q)" /> in the curved universe
-        has a singularity at <Eq tex="X = 4/3" /> -- this is the Big Bang.
+        has a singularity at{" "}
+        <HoverTerm term={TERMS.bigBang}><Eq tex="X = 4/3" /></HoverTerm> —
+        this is the <HoverTerm term={TERMS.bigBang}>Big Bang</HoverTerm>.
         Time flows in the direction of decreasing <Eq tex="X" />: the arrow
         of time points from large <Eq tex="X" /> (diffusion-dominated past)
         toward small <Eq tex="X" /> (geometry-dominated future).
@@ -31,24 +37,24 @@ export default function Acceleration({ param, onChangeParam }) {
       `} />
 
       <p style={styles.prose}>
-        Before the Big Bang (<Eq tex="X > 4/3" />), the universe undergoes
-        violent implosion; after (<Eq tex="X < 4/3" />), violent explosion.
-        In both asymptotic limits -- far past and far future -- the universe
-        approaches a static state. The Big Bang is not the beginning of time
-        but a singularity in an infinitely old cosmos, separating a
-        pre-Big-Bang era of diffusion dominance from the post-Big-Bang era
-        of geometric expansion.
+        Before the <HoverTerm term={TERMS.bigBang}>Big Bang</HoverTerm>{" "}
+        (<Eq tex="X > 4/3" />), the universe undergoes
+        violent implosion; after (<Eq tex="X &lt; 4/3" />), violent explosion.
+        In both asymptotic limits the universe
+        approaches a static state. The{" "}
+        <HoverTerm term={TERMS.bigBang}>Big Bang</HoverTerm> is not the beginning
+        of time but a singularity in an infinitely old cosmos.
       </p>
 
       <div style={styles.figureBox}>
         {width > 0 && (
-          <AccelerationPlot param={param} width={Math.min(width - 16, 600)} height={300} />
+          <AccelerationPlot param={param} width={Math.min(width - 16, 600)} height={300} highlight={active} />
         )}
         <Slider value={param} onChange={onChangeParam} meta={meta} />
         <div style={styles.figureCaption}>
-          <strong>Acceleration divergence</strong> -- the singularity
-          at <Eq tex="X = 4/3" /> marks the Big Bang. The universe is
-          asymptotically static on both sides.
+          <strong>Acceleration divergence</strong> — the singularity
+          at <HoverTerm term={TERMS.bigBang}><Eq tex="X = 4/3" /></HoverTerm> marks
+          the Big Bang.
         </div>
       </div>
     </section>

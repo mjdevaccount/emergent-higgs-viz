@@ -1,10 +1,14 @@
 import { useRef, useEffect, useState } from "react";
 import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { useHighlight } from "@/shared/HighlightContext.jsx";
 import { styles } from "@/theme.js";
 import meta from "../meta.js";
+import { TERMS } from "../highlight.js";
 import TensionPlot from "../viz/TensionPlot.jsx";
 
 export default function Tension({ param, onChangeParam }) {
+  const { active } = useHighlight();
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
@@ -30,11 +34,11 @@ export default function Tension({ param, onChangeParam }) {
 
       <p style={styles.prose}>
         At <Eq tex="X \\to 0" /> both approaches agree
-        on <Eq tex="w \\to -1" /> (vacuum), but at <Eq tex="X \\to \\infty" /> the
+        on <HoverTerm term={TERMS.vacuum}><Eq tex="w \\to -1" /> (vacuum)</HoverTerm>, but at <Eq tex="X \\to \\infty" /> the
         species equation yields <Eq tex="w_S \\to -2/3" /> while the Friedmann
         equation of state approaches <Eq tex="w \\to -1/3" />. This is
         a genuine tension -- two independent routes to the same quantity give
-        different answers in the diffusion-dominated regime:
+        different answers in the <HoverTerm term={TERMS.diffusion}>diffusion</HoverTerm>-dominated regime:
       </p>
 
       <Eq display num="31-32" tex={`
@@ -45,7 +49,7 @@ export default function Tension({ param, onChangeParam }) {
 
       <div style={styles.figureBox}>
         {width > 0 && (
-          <TensionPlot param={param} width={Math.min(width - 16, 600)} height={300} />
+          <TensionPlot param={param} width={Math.min(width - 16, 600)} height={300} highlight={active} />
         )}
         <Slider value={param} onChange={onChangeParam} meta={meta} />
         <div style={styles.figureCaption}>

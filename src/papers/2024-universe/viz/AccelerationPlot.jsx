@@ -5,9 +5,10 @@ import {
   drawMarker, drawLegend, drawAxes, drawYTicks, drawHLine,
 } from "@/canvas-utils.js";
 import { X_BIG_BANG, accelCurved, accelFlat } from "../physics.js";
+import { isBigBangHighlighted } from "../highlight.js";
 
 // Acceleration -(1+q) vs X showing the Big Bang singularity at X=4/3.
-export default function AccelerationPlot({ param, width, height }) {
+export default function AccelerationPlot({ param, width, height, highlight }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -23,10 +24,13 @@ export default function AccelerationPlot({ param, width, height }) {
     drawGrid(ctx, pad, w, h, { hLines: 5 });
     drawHLine(ctx, pad, w, toY, 0, { color: "rgba(255,255,255,0.15)", label: "" });
 
-    // Big Bang vertical
+    // Big Bang vertical — glows on hover
+    const bbHl = isBigBangHighlighted(highlight);
     const bbX = toX(X_BIG_BANG);
-    ctx.strokeStyle = "rgba(255,80,80,0.5)";
-    ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = bbHl ? "rgba(255,80,80,1)" : "rgba(255,80,80,0.5)";
+    ctx.lineWidth = bbHl ? 4 : 2;
+    if (bbHl) { ctx.shadowColor = "rgba(255,80,80,0.7)"; ctx.shadowBlur = 16; }
+    ctx.setLineDash(bbHl ? [] : [6, 4]);
     ctx.beginPath(); ctx.moveTo(bbX, pad.top); ctx.lineTo(bbX, pad.top + h); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = "rgba(255,80,80,0.7)";
@@ -34,6 +38,7 @@ export default function AccelerationPlot({ param, width, height }) {
     ctx.textAlign = "center";
     ctx.fillText("BIG BANG", bbX, pad.top + 14);
     ctx.fillText("X = 4/3", bbX, pad.top + 26);
+    ctx.shadowBlur = 0;
 
     // Time arrow annotations
     ctx.fillStyle = colors.textCaption;
@@ -76,7 +81,7 @@ export default function AccelerationPlot({ param, width, height }) {
 
     drawAxes(ctx, pad, w, h, { xLabel: "X = D/H", yLabel: "-(1+q) \u2014 acceleration" });
     drawYTicks(ctx, toY, pad, { min: -yClamp, max: yClamp, step: 250, decimals: 0 });
-  }, [param, width, height]);
+  }, [param, width, height, highlight]);
 
   return <canvas ref={canvasRef} style={{ width, height }} />;
 }

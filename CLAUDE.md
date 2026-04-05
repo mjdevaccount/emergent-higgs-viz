@@ -107,6 +107,7 @@ Each step is a separate focused task. Do NOT combine steps.
   - `@/theme.js` for all colors and fonts
   - `../physics.js` for math functions
 - Each component accepts at minimum: `{ param, width, height }` where param is the sweep parameter
+- Also accept optional `highlight` prop for Step 10 hover effects
 - Keep components focused: ~70-120 lines each
 - Output: viz components
 
@@ -132,10 +133,39 @@ Each step is a separate focused task. Do NOT combine steps.
 - Output: working navigation between papers
 
 ### Step 10: POLISH — Cross-references and hover effects
-- Add `highlight.js` with term definitions if the paper has cross-referencing terms
-- Wire HoverTerm into sections where terms reference specific viz elements
-- Verify hover interactions work across sections
-- Output: interactive cross-references
+
+This step adds the mouseover highlight system where hovering a physics term in
+prose causes the corresponding element in a visualization to glow.
+
+**10a. Define terms** — Create `src/papers/YEAR-shortname/highlight.js`:
+- Export `TERMS` object: `{ termName: "termName", ... }` (3-6 terms)
+- Export `ALL_TERMS` Set for validation
+- Export one `isXxxHighlighted(highlight)` function per term
+- Export `TERM_CONSUMERS` map: `{ [term]: ["VizComponent1", ...] }`
+- Choose terms that bridge PROSE → VIZ (e.g. "Big Bang" in text → glows the X=4/3 line in the plot)
+
+**10b. Update viz components** — For each viz that consumes a term:
+- Add `highlight` to props: `({ param, width, height, highlight })`
+- Import the matching function from `../highlight.js`
+- Conditionally increase lineWidth, opacity, shadowBlur when `isXxxHighlighted(highlight)` is true
+- Add `highlight` to the useEffect dependency array
+
+**10c. Update section prose** — For each section that produces hover events:
+- Import `HoverTerm` from `@/shared/HoverTerm.jsx`
+- Import `{ useHighlight }` from `@/shared/HighlightContext.jsx`
+- Import `{ TERMS }` from `../highlight.js`
+- Add `const { active } = useHighlight();` in the component
+- Pass `highlight={active}` to the viz component
+- Wrap 2-4 key phrases per section: `<HoverTerm term={TERMS.xxx}>phrase</HoverTerm>`
+- Keep it natural — don't wrap every mention, just the most impactful ones
+
+**10d. Wire provider** — In `index.jsx`, wrap content in `<HighlightProvider>`
+
+**10e. Write contract tests** — Create `tests/SHORTNAME-highlight.test.js`:
+- Test that every TERM has consumers
+- Test that matching functions return true/false correctly
+- Test consumer count expectations
+- Output: passing test suite (run with `node tests/SHORTNAME-highlight.test.js`)
 
 ---
 

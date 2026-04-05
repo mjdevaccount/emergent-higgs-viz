@@ -5,10 +5,11 @@ import {
   drawMarker, drawLegend, drawAxes, drawYTicks, drawHLine,
 } from "@/canvas-utils.js";
 import { X_BIG_BANG, wSpeciesFlat, wFriedmannFlat } from "../physics.js";
+import { isBigBangHighlighted, isVacuumHighlighted } from "../highlight.js";
 
 // Shows the w vs w_S tension in a flat (k=0) universe.
 // The two curves diverge at large X — motivating curvature.
-export default function TensionPlot({ param, width, height }) {
+export default function TensionPlot({ param, width, height, highlight }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -22,15 +23,22 @@ export default function TensionPlot({ param, width, height }) {
 
     drawGrid(ctx, pad, w, h, { hLines: 6 });
 
-    // Reference lines
-    drawHLine(ctx, pad, w, toY, -1, { color: rgba(colors.cyan, 0.3), label: "w = -1 (vacuum)" });
+    // Reference lines — glow when highlighted
+    const vacHl = isVacuumHighlighted(highlight);
+    drawHLine(ctx, pad, w, toY, -1, {
+      color: vacHl ? colors.cyan : rgba(colors.cyan, 0.3),
+      label: "w = -1 (vacuum)",
+      dash: vacHl ? [] : [6, 4],
+    });
     drawHLine(ctx, pad, w, toY, -2/3, { color: rgba(colors.gold, 0.25), label: "w = -2/3" });
 
-    // Big Bang ref line
+    // Big Bang ref line — glow when highlighted
+    const bbHl = isBigBangHighlighted(highlight);
     const bbX = toX(X_BIG_BANG);
-    ctx.strokeStyle = "rgba(255,80,80,0.4)";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = bbHl ? "rgba(255,80,80,0.9)" : "rgba(255,80,80,0.4)";
+    ctx.lineWidth = bbHl ? 3 : 1;
+    if (bbHl) { ctx.shadowColor = "rgba(255,80,80,0.6)"; ctx.shadowBlur = 12; }
+    ctx.setLineDash(bbHl ? [] : [4, 4]);
     ctx.beginPath(); ctx.moveTo(bbX, pad.top); ctx.lineTo(bbX, pad.top + h); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = "rgba(255,80,80,0.6)";
@@ -38,6 +46,7 @@ export default function TensionPlot({ param, width, height }) {
     ctx.textAlign = "center";
     ctx.fillText("Big Bang", bbX, pad.top + h + 14);
     ctx.fillText("X=4/3", bbX, pad.top + h + 26);
+    ctx.shadowBlur = 0;
 
     // Compute curves — skip near singularity
     const steps = 500;
@@ -74,7 +83,7 @@ export default function TensionPlot({ param, width, height }) {
 
     drawAxes(ctx, pad, w, h, { xLabel: "X = D/H", yLabel: "equation of state" });
     drawYTicks(ctx, toY, pad, { min: -1, max: 0, step: 0.2 });
-  }, [param, width, height]);
+  }, [param, width, height, highlight]);
 
   return <canvas ref={canvasRef} style={{ width, height }} />;
 }

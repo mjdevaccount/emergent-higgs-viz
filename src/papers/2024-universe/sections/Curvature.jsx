@@ -1,10 +1,14 @@
 import { useRef, useEffect, useState } from "react";
 import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { useHighlight } from "@/shared/HighlightContext.jsx";
 import { styles } from "@/theme.js";
 import meta from "../meta.js";
+import { TERMS } from "../highlight.js";
 import EquationOfStatePlot from "../viz/EquationOfStatePlot.jsx";
 
 export default function Curvature({ param, onChangeParam }) {
+  const { active } = useHighlight();
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
@@ -38,8 +42,8 @@ export default function Curvature({ param, onChangeParam }) {
 
       <p style={styles.prose}>
         Now <Eq tex="w = w_S" /> asymptotically in both limits. The diffusive
-        species carries an equation of state <Eq tex="w_D = -1/3" />,
-        interpolating between vacuum (<Eq tex="w = -1" />) at
+        species carries an equation of state <HoverTerm term={TERMS.diffusion}><Eq tex="w_D = -1/3" /></HoverTerm>,
+        interpolating between <HoverTerm term={TERMS.vacuum}>vacuum (<Eq tex="w = -1" />)</HoverTerm> at
         small <Eq tex="X" /> and the diffusion-dominated
         regime at large <Eq tex="X" />. The curvature is not imposed by
         hand -- it is the unique value that makes Friedmann and species
@@ -48,7 +52,7 @@ export default function Curvature({ param, onChangeParam }) {
 
       <div style={styles.figureBox}>
         {width > 0 && (
-          <EquationOfStatePlot param={param} width={Math.min(width - 16, 600)} height={300} />
+          <EquationOfStatePlot param={param} width={Math.min(width - 16, 600)} height={300} highlight={active} />
         )}
         <Slider value={param} onChange={onChangeParam} meta={meta} />
         <div style={styles.figureCaption}>

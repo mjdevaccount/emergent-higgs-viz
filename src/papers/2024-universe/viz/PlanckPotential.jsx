@@ -5,10 +5,11 @@ import {
   drawLegend, drawAxes, drawYTicks, drawHLine,
 } from "@/canvas-utils.js";
 import { phi4Potential, sombreroPotential, sombreroVEV } from "../physics.js";
+import { isSombreroHighlighted } from "../highlight.js";
 
 // Shows phi⁴ potential (pre-SSB) and sombrero (post-SSB) side by side.
 // The sombrero connects this paper to the 2026 Higgs paper.
-export default function PlanckPotential({ width, height }) {
+export default function PlanckPotential({ width, height, highlight }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -39,9 +40,11 @@ export default function PlanckPotential({ width, height }) {
       color: rgba(colors.text, 0.4), lineWidth: 1.5, dash: [5, 3],
     });
 
-    // Sombrero (post-SSB)
+    // Sombrero (post-SSB) — glows on hover
+    const somHl = isSombreroHighlighted(highlight);
     drawCurve(ctx, ptsSombrero, toX, toY, pad, h, {
-      color: colors.gold, lineWidth: 2.2, glow: rgba(colors.gold, 0.4),
+      color: colors.gold, lineWidth: somHl ? 3.5 : 2.2,
+      glow: rgba(colors.gold, somHl ? 0.8 : 0.4),
     });
 
     // Mark VEV positions
@@ -65,7 +68,7 @@ export default function PlanckPotential({ width, height }) {
 
     drawAxes(ctx, pad, w, h, { xLabel: "\u03c6 (Planck field)", yLabel: "V(\u03c6)" });
     drawYTicks(ctx, toY, pad, { min: -0.1, max: 0.5, step: 0.1 });
-  }, [width, height]);
+  }, [width, height, highlight]);
 
   return <canvas ref={canvasRef} style={{ width, height }} />;
 }

@@ -5,10 +5,11 @@ import {
   drawMarker, drawLegend, drawAxes, drawYTicks, drawHLine,
 } from "@/canvas-utils.js";
 import { X_BIG_BANG, wSpeciesCurved, wFriedmannCurved } from "../physics.js";
+import { isBigBangHighlighted, isVacuumHighlighted, isDiffusionHighlighted } from "../highlight.js";
 
 // Shows w and w_S for the curved universe — tension resolved.
 // Both curves converge at X→0 and X→∞.
-export default function EquationOfStatePlot({ param, width, height }) {
+export default function EquationOfStatePlot({ param, width, height, highlight }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -22,16 +23,27 @@ export default function EquationOfStatePlot({ param, width, height }) {
 
     drawGrid(ctx, pad, w, h, { hLines: 6 });
 
-    drawHLine(ctx, pad, w, toY, -1, { color: rgba(colors.cyan, 0.3), label: "w = -1 (vacuum)" });
-    drawHLine(ctx, pad, w, toY, -1/3, { color: rgba(colors.gold, 0.25), label: "w = -1/3 (diffusion)" });
+    const vacHl = isVacuumHighlighted(highlight);
+    const difHl = isDiffusionHighlighted(highlight);
+    drawHLine(ctx, pad, w, toY, -1, {
+      color: vacHl ? colors.cyan : rgba(colors.cyan, 0.3),
+      label: "w = -1 (vacuum)", dash: vacHl ? [] : [6, 4],
+    });
+    drawHLine(ctx, pad, w, toY, -1/3, {
+      color: difHl ? colors.gold : rgba(colors.gold, 0.25),
+      label: "w = -1/3 (diffusion)", dash: difHl ? [] : [6, 4],
+    });
 
     // Big Bang
+    const bbHl = isBigBangHighlighted(highlight);
     const bbX = toX(X_BIG_BANG);
-    ctx.strokeStyle = "rgba(255,80,80,0.4)";
-    ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = bbHl ? "rgba(255,80,80,0.9)" : "rgba(255,80,80,0.4)";
+    ctx.lineWidth = bbHl ? 3 : 1;
+    if (bbHl) { ctx.shadowColor = "rgba(255,80,80,0.6)"; ctx.shadowBlur = 12; }
+    ctx.setLineDash(bbHl ? [] : [4, 4]);
     ctx.beginPath(); ctx.moveTo(bbX, pad.top); ctx.lineTo(bbX, pad.top + h); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = "rgba(255,80,80,0.6)";
+    ctx.setLineDash([]); ctx.shadowBlur = 0;
+    ctx.fillStyle = bbHl ? "rgba(255,80,80,0.9)" : "rgba(255,80,80,0.6)";
     ctx.font = "9px 'IBM Plex Mono', monospace";
     ctx.textAlign = "center";
     ctx.fillText("Big Bang", bbX, pad.top + h + 14);
@@ -66,7 +78,7 @@ export default function EquationOfStatePlot({ param, width, height }) {
 
     drawAxes(ctx, pad, w, h, { xLabel: "X = D/H", yLabel: "equation of state" });
     drawYTicks(ctx, toY, pad, { min: -1, max: 0, step: 0.2 });
-  }, [param, width, height]);
+  }, [param, width, height, highlight]);
 
   return <canvas ref={canvasRef} style={{ width, height }} />;
 }

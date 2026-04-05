@@ -1,9 +1,13 @@
 import { useRef, useEffect, useState } from "react";
 import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { useHighlight } from "@/shared/HighlightContext.jsx";
 import { styles } from "@/theme.js";
+import { TERMS } from "../highlight.js";
 import PlanckPotential from "../viz/PlanckPotential.jsx";
 
 export default function PlanckFields() {
+  const { active } = useHighlight();
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
@@ -36,7 +40,7 @@ export default function PlanckFields() {
       <p style={styles.prose}>
         Transitioning to spherical field coordinates breaks the symmetry. One
         radial mode acquires a nonzero VEV and mass, producing the familiar
-        sombrero potential. This is the cosmological origin of the mechanism
+        <HoverTerm term={TERMS.sombrero}>sombrero potential</HoverTerm>. This is the cosmological origin of the mechanism
         explored in the companion 2026 paper on the emergent Higgs field:
       </p>
 
@@ -56,12 +60,12 @@ export default function PlanckFields() {
 
       <div style={styles.figureBox}>
         {width > 0 && (
-          <PlanckPotential width={Math.min(width - 16, 600)} height={300} />
+          <PlanckPotential width={Math.min(width - 16, 600)} height={300} highlight={active} />
         )}
         <div style={styles.figureCaption}>
           <strong>Planck field potentials</strong> -- the
           pure <Eq tex="\varphi^4" /> potential (Eq. 72, dashed) and the
-          sombrero after SSB (Eq. 89, solid). Symmetry breaking is driven by
+          <HoverTerm term={TERMS.sombrero}>sombrero</HoverTerm> after SSB (Eq. 89, solid). Symmetry breaking is driven by
           spacetime geometry, not an assumed Lagrangian.
         </div>
       </div>

@@ -1,10 +1,14 @@
 import { useRef, useEffect, useState } from "react";
 import Eq from "@/shared/Eq.jsx";
+import HoverTerm from "@/shared/HoverTerm.jsx";
+import { useHighlight } from "@/shared/HighlightContext.jsx";
 import { styles } from "@/theme.js";
 import meta from "../meta.js";
+import { TERMS } from "../highlight.js";
 import SpeciesBar from "../viz/SpeciesBar.jsx";
 
 export default function Species({ param, onChangeParam }) {
+  const { active } = useHighlight();
   const [width, setWidth] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
@@ -19,8 +23,8 @@ export default function Species({ param, onChangeParam }) {
       <h2 style={styles.heading}>5. Species Evolution</h2>
 
       <p style={styles.prose}>
-        The conserved energy density decomposes into four species: vacuum
-        (<Eq tex="w = -1" />), diffusion (<Eq tex="w = -1/3" />), matter
+        The conserved energy density decomposes into four species: <HoverTerm term={TERMS.vacuum}>vacuum
+        (<Eq tex="w = -1" />)</HoverTerm>, <HoverTerm term={TERMS.diffusion}>diffusion (<Eq tex="w = -1/3" />)</HoverTerm>, matter
         (<Eq tex="w = 0" />), and radiation (<Eq tex="w = 1/3" />). In the
         far future (<Eq tex="X \to 0" />), vacuum dominates with small
         admixtures of matter and diffusion. In the far past
@@ -37,14 +41,14 @@ export default function Species({ param, onChangeParam }) {
         Energy is conserved across all species:
         {" "}<Eq tex="\sum \dot{\Omega}_i = 0" />. As <Eq tex="X" /> decreases
         from infinity, the universe transitions smoothly from pure diffusion
-        through the Big Bang singularity and into a vacuum-dominated future.
+        through the <HoverTerm term={TERMS.bigBang}>Big Bang singularity</HoverTerm> and into a vacuum-dominated future.
         The bar below shows the fractional composition at the
         current <Eq tex="X" /> value.
       </p>
 
       <div style={styles.figureBox}>
         {width > 0 && (
-          <SpeciesBar param={param} width={Math.min(width - 16, 600)} height={80} />
+          <SpeciesBar param={param} width={Math.min(width - 16, 600)} height={80} highlight={active} />
         )}
         <Slider value={param} onChange={onChangeParam} meta={meta} />
         <div style={styles.figureCaption}>

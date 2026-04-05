@@ -1,17 +1,31 @@
 import { colors, rgba, fonts, styles } from "@/theme.js";
 import { speciesFractions } from "../physics.js";
+import { isVacuumHighlighted, isDiffusionHighlighted } from "../highlight.js";
 
 // Animated stacked bar showing vacuum / diffusion / matter fractions vs X.
-export default function SpeciesBar({ param }) {
+export default function SpeciesBar({ param, highlight }) {
   const { vacuum, diffusion, matter } = speciesFractions(param);
+  const vacHl = isVacuumHighlighted(highlight);
+  const difHl = isDiffusionHighlighted(highlight);
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto" }}>
       {/* Stacked bar */}
       <div style={barOuter}>
-        <div style={{ ...barFill, width: `${vacuum * 100}%`, background: cyanGrad }} />
-        <div style={{ ...barFill, width: `${diffusion * 100}%`, background: goldGrad }} />
-        <div style={{ ...barFill, width: `${matter * 100}%`, background: dimGrad }} />
+        <div style={{
+          ...barFill, width: `${vacuum * 100}%`, background: cyanGrad,
+          boxShadow: vacHl ? `0 0 12px ${rgba(colors.cyan, 0.6)}` : "none",
+          opacity: vacHl ? 1 : difHl ? 0.4 : 1,
+        }} />
+        <div style={{
+          ...barFill, width: `${diffusion * 100}%`, background: goldGrad,
+          boxShadow: difHl ? `0 0 12px ${rgba(colors.gold, 0.6)}` : "none",
+          opacity: difHl ? 1 : vacHl ? 0.4 : 1,
+        }} />
+        <div style={{
+          ...barFill, width: `${matter * 100}%`, background: dimGrad,
+          opacity: (vacHl || difHl) ? 0.3 : 1,
+        }} />
       </div>
 
       {/* Labels */}

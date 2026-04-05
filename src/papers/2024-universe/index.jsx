@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "katex/dist/katex.min.css";
+import { HighlightProvider } from "@/shared/HighlightContext.jsx";
 import PaperShell from "@/shared/PaperShell.jsx";
 import meta from "./meta.js";
 
@@ -25,13 +26,15 @@ export default function Universe2024({ onBack }) {
   const [X, setX] = useState(meta.paramDefault);
 
   return (
-    <PaperShell meta={meta} toc={TOC} param={X} onParam={setX} onBack={onBack}>
-      <div id="framework" style={anchor}><Framework /></div>
-      <div id="tension" style={anchor}><Tension param={X} onChangeParam={setX} /></div>
-      <div id="curvature" style={anchor}><Curvature param={X} onChangeParam={setX} /></div>
-      <div id="acceleration" style={anchor}><Acceleration param={X} onChangeParam={setX} /></div>
-      <div id="species" style={anchor}><Species param={X} onChangeParam={setX} /></div>
-      <div id="planck" style={anchor}><PlanckFields /></div>
-    </PaperShell>
+    <HighlightProvider>
+      <PaperShell meta={meta} toc={TOC} param={X} onParam={setX} onBack={onBack}>
+        <div id="framework" style={anchor}><Framework /></div>
+        <div id="tension" style={anchor}><Tension param={X} onChangeParam={setX} /></div>
+        <div id="curvature" style={anchor}><Curvature param={X} onChangeParam={setX} /></div>
+        <div id="acceleration" style={anchor}><Acceleration param={X} onChangeParam={setX} /></div>
+        <div id="species" style={anchor}><Species param={X} onChangeParam={setX} /></div>
+        <div id="planck" style={anchor}><PlanckFields /></div>
+      </PaperShell>
+    </HighlightProvider>
   );
 }
