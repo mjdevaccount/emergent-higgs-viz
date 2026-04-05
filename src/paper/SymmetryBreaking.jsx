@@ -30,7 +30,7 @@ export default function SymmetryBreaking({ radialPos, onChangeR }) {
 
       <Eq display num="32" tex={`
         \\frac{U_\\pm(r)}{m^2 \\phi^2} = 2\\left\\{1 +
-        \\frac{2}{\\htmlClass{hl-r0}{r}^2}\\left(\\frac{1}{4} \\mp \\sqrt{\\frac{r^2}{2\\htmlClass{hl-r0}{r_0}^2} - \\frac{3}{16}}\\right)^{\\!2} +
+        \\frac{2}{r^2}\\left(\\frac{1}{4} \\mp \\sqrt{\\frac{r^2}{2r_0^2} - \\frac{3}{16}}\\right)^{\\!2} +
         \\frac{2}{r^4}\\left(\\frac{1}{4} \\pm \\sqrt{\\frac{r^2}{2r_0^2} - \\frac{3}{16}}\\right)^{\\!2}
         \\right\\}
       `} />
