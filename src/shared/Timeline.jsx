@@ -19,14 +19,16 @@ export default function Timeline({ papers, onSelect }) {
         <header style={header}>
           <div style={siteTag}>Interactive Paper Companion</div>
           <h1 style={siteTitle}>
-            Stochastic Spacetime
+            From Uncertainty to Mass
             <span style={{ display: "block", color: colors.cyan, fontSize: "0.6em", fontWeight: 300, marginTop: 8 }}>
-              The Research of Dragana Pilipovi&#263;
+              The stochastic spacetime research of Dragana Pilipovi&#263;
             </span>
           </h1>
           <p style={siteSubtitle}>
-            From fundamental uncertainty at Planck scale to emergent gravity,
-            dark energy, and the Higgs field — explore each paper interactively.
+            What if spacetime itself carries a fundamental uncertainty? Four papers
+            trace the consequences — from dark energy and the Hubble tension to
+            galaxy rotation curves, an infinitely old universe, and the emergence
+            of the Higgs field inside a black hole.
           </p>
         </header>
 

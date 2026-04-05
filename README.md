@@ -1,4 +1,4 @@
-# Stochastic Spacetime — Interactive Research Companion
+# From Uncertainty to Mass — Interactive Research Companion
 
 A multi-paper interactive visualization platform covering Dragana Pilipovi&#263;'s four-year research program on stochastic spacetime: from the Hubble tension (2023) through the mathematical foundations (2024) to an infinitely old universe (2024) and emergent Higgs fields inside black holes (2026).
 
